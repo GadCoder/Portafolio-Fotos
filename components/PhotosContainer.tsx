@@ -6,7 +6,7 @@ export default function PhotosContainer() {
   ));
 
   return (
-    <div className="columns-1 md:columns-3 lg:columns-4 gap-4">
+    <div className="columns-1 md:columns-3 lg:columns-4 gap-5">
       {photosArray}
     </div>
   );

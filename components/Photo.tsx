@@ -6,15 +6,14 @@ export default function Photo({
   isHorizontal?: boolean;
 }) {
   return (
-    <div className="mb-4">
-      <Image
-        src={`/images/obi-${isHorizontal ? "horizontal" : "vertical"}.jpg`}
-        width={0}
-        height={0}
-        sizes="100vw"
-        style={{ width: "100%", height: "auto" }} // optional
-        alt="Obi Wan el mejor"
-      />
-    </div>
+    <Image
+      src={`/images/obi-${isHorizontal ? "horizontal" : "vertical"}.jpg`}
+      width={0}
+      height={0}
+      sizes="100vw"
+      style={{ width: "100%", height: "auto" }} // optional
+      alt="Obi Wan el mejor"
+      className="mb-4 rounded"
+    />
   );
 }

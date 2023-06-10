@@ -1,0 +1,14 @@
+self.__RSC_CSS_MANIFEST={
+  "cssImports": {
+    "/home/gad/Code/Portafolio-Fotos/app/layout.tsx": [
+      "/home/gad/Code/Portafolio-Fotos/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}",
+      "/home/gad/Code/Portafolio-Fotos/app/globals.css"
+    ]
+  },
+  "cssModules": {
+    "/home/gad/Code/Portafolio-Fotos/app/page": [
+      "/home/gad/Code/Portafolio-Fotos/app/globals.css",
+      "/home/gad/Code/Portafolio-Fotos/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}"
+    ]
+  }
+}
