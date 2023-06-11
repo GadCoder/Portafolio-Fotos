@@ -13,7 +13,7 @@ export default function Photo({
       sizes="100vw"
       style={{ width: "100%", height: "auto" }} // optional
       alt="Obi Wan el mejor"
-      className="mb-4 rounded"
+      className="mb-6 rounded"
     />
   );
 }

@@ -581,15 +581,18 @@ video {
     max-width: 1536px;
   }
 }
+.relative {
+  position: relative;
+}
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
 }
-.mb-4 {
-  margin-bottom: 1rem;
+.mb-6 {
+  margin-bottom: 1.5rem;
 }
-.mb-8 {
-  margin-bottom: 2rem;
+.mt-4 {
+  margin-top: 1rem;
 }
 .flex {
   display: flex;
@@ -597,24 +600,18 @@ video {
 .grid {
   display: grid;
 }
+.h-16 {
+  height: 4rem;
+}
+.w-16 {
+  width: 4rem;
+}
 .columns-1 {
   -moz-columns: 1;
        columns: 1;
 }
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-.grid-rows-2 {
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.flex-row {
-  flex-direction: row;
-}
-.flex-col {
-  flex-direction: column;
 }
 .items-center {
   align-items: center;
@@ -622,11 +619,8 @@ video {
 .justify-between {
   justify-content: space-between;
 }
-.gap-1 {
-  gap: 0.25rem;
-}
-.gap-5 {
-  gap: 1.25rem;
+.gap-2 {
+  gap: 0.5rem;
 }
 .gap-6 {
   gap: 1.5rem;
@@ -637,18 +631,15 @@ video {
 .rounded-full {
   border-radius: 9999px;
 }
-.p-5 {
-  padding: 1.25rem;
+.p-4 {
+  padding: 1rem;
 }
-.text-lg {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 .font-bold {
   font-weight: 700;
-}
-.font-medium {
-  font-weight: 500;
 }
 @import url("https://rsms.me/inter/inter.css");
 
@@ -657,25 +648,37 @@ body {
 
 @media (min-width: 768px) {
 
-  .md\:columns-3 {
-    -moz-columns: 3;
-         columns: 3;
+  .md\:h-24 {
+    height: 6rem;
+  }
+
+  .md\:w-24 {
+    width: 6rem;
+  }
+
+  .md\:columns-2 {
+    -moz-columns: 2;
+         columns: 2;
   }
 
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .md\:gap-3 {
-    gap: 0.75rem;
+  .md\:grid-rows-2 {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
   }
 
-  .md\:p-2 {
-    padding: 0.5rem;
+  .md\:gap-4 {
+    gap: 1rem;
   }
 
-  .md\:pb-10 {
-    padding-bottom: 2.5rem;
+  .md\:p-1 {
+    padding: 0.25rem;
+  }
+
+  .md\:pb-8 {
+    padding-bottom: 2rem;
   }
 
   .md\:text-3xl {
@@ -691,9 +694,9 @@ body {
 
 @media (min-width: 1024px) {
 
-  .lg\:columns-4 {
-    -moz-columns: 4;
-         columns: 4;
+  .lg\:columns-3 {
+    -moz-columns: 3;
+         columns: 3;
   }
 }
 

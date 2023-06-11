@@ -8,7 +8,7 @@ export default function ToggleSwitch() {
   return (
     <div className="flex items-center">
       <Switch
-        defaultChecked
+        checked={theme === "dark"}
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       />
       {theme === "dark" ? <FaSun /> : <FaRegMoon />}
