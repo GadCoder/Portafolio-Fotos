@@ -9,13 +9,19 @@ export default function Photo({
   src: string;
   name: string;
 }) {
+  const imageStyle: React.CSSProperties = {
+    width: "100%",
+    height: "auto",
+    objectFit: "cover",
+    transform: isHorizontal ? "none" : "rotate(90deg)",
+  };
   return (
     <Image
       src={src}
       width={0}
       height={0}
       sizes="100vw"
-      style={{ width: "100%", height: "auto" }}
+      style={imageStyle}
       alt={name}
       className="mb-6 rounded"
     />
