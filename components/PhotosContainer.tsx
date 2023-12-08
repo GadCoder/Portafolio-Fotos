@@ -1,8 +1,33 @@
+import { useEffect, useState } from "react";
 import Photo from "./Photo";
+import getPhotos from "@/app/api";
 
+type Photo = {
+  id: number;
+  is_horizontal: boolean;
+  photo_url: string;
+  name: string;
+};
 export default function PhotosContainer() {
-  const photosArray = Array.from({ length: 32 }).map((_, index) => (
-    <Photo isHorizontal={index % 3 == 0 || index % 5 == 0} key={index} />
+  const [listOfPhotos, setListOfPhotos] = useState<Photo[]>([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const photos = await getPhotos();
+      if (photos != null) {
+        setListOfPhotos(photos);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const photosArray = listOfPhotos.map((photo: Photo) => (
+    <Photo
+      isHorizontal={photo.is_horizontal}
+      src={photo.photo_url}
+      name={photo.name}
+      key={photo.name}
+    />
   ));
 
   return (
