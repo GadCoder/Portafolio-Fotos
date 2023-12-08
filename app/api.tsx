@@ -1,5 +1,5 @@
 export default async function getPhotos() {
-  const url: string = "http://159.112.132.79:8000/get-all-photos/";
+  const url: string = "https://photos-api.gadcoder.com/get-all-photos/";
   try {
     const request = await fetch(url);
     const result = await request.json();
