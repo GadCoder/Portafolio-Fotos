@@ -14,8 +14,8 @@ export default function TopBar() {
         </div>
         <div className="grid md:grid-rows-2 gap-2 md:gap-4 ">
           <h1 className="font-bold text-md md:text-3xl">Germán Ampuero</h1>
-          <h2 className="font-regular text-sm md:text-xl" style={{}}>
-            Fotógrafo aficionado
+          <h2 className="font-regular text-sm md:text-xl">
+            Fotógrafo cuando no estoy programando
           </h2>
         </div>
       </div>
