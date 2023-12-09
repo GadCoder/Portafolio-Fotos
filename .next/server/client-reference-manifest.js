@@ -1022,20 +1022,6 @@ self.__RSC_MANIFEST={
       ],
       "async": false
     },
-    "/home/german/Code/Github/Portafolio-Fotos/app/globals.css#": {
-      "id": "null",
-      "name": "default",
-      "chunks": [
-        "static/css/app/layout.css"
-      ]
-    },
-    "/home/german/Code/Github/Portafolio-Fotos/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}#": {
-      "id": "null",
-      "name": "default",
-      "chunks": [
-        "static/css/app/layout.css"
-      ]
-    },
     "/home/german/Code/Github/Portafolio-Fotos/app/page.tsx": {
       "id": "(app-client)/./app/page.tsx",
       "name": "*",
@@ -1195,6 +1181,20 @@ self.__RSC_MANIFEST={
         "app/page:static/chunks/app/page.js"
       ],
       "async": false
+    },
+    "/home/german/Code/Github/Portafolio-Fotos/app/globals.css#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/layout.css"
+      ]
+    },
+    "/home/german/Code/Github/Portafolio-Fotos/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/layout.css"
+      ]
     }
   }
 }
