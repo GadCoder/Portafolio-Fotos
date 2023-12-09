@@ -15,7 +15,7 @@ export default function Photo({
     objectFit: "cover",
   };
   return (
-    <Image
+    <img
       src={src}
       width={0}
       height={0}
