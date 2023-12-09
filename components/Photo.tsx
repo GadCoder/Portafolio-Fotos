@@ -13,7 +13,6 @@ export default function Photo({
     width: "100%",
     height: "auto",
     objectFit: "cover",
-    transform: isHorizontal ? "none" : "rotate(90deg)",
   };
   return (
     <Image

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Photo from "./Photo";
-import getPhotos from "@/app/api";
+import { getPhotos } from "@/app/api";
 
 type Photo = {
   id: number;

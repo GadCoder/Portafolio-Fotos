@@ -1,4 +1,4 @@
-export default async function getPhotos() {
+export async function getPhotos() {
   const url: string = "https://photos-api.gadcoder.com/get-all-photos/";
   try {
     const request = await fetch(url);
@@ -9,4 +9,8 @@ export default async function getPhotos() {
     console.error("Error fetching data:", error);
     return null;
   }
+}
+
+export function getPhotoDimensions(src: string) {
+  const image = new Image();
 }
