@@ -1,5 +1,5 @@
 export async function getPhotos() {
-  const url: string = "https://photos-api.gadcoder.com/get-all-photos/";
+  const url: string = "https://portfolio-api.gadsw.dev/get-all-photos/";
   try {
     const request = await fetch(url);
     const result = await request.json();
