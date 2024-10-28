@@ -1,16 +1,7 @@
-import Image from "next/image";
 import { useState } from "react";
 import FadeLoader from "react-spinners/FadeLoader";
 
-export default function Photo({
-  isHorizontal,
-  src,
-  name,
-}: {
-  isHorizontal?: boolean;
-  src: string;
-  name: string;
-}) {
+export default function Photo({ src }: { src: string }) {
   let [loading, setLoading] = useState(true);
   const imageStyle: React.CSSProperties = {
     width: "100%",
@@ -26,6 +17,7 @@ export default function Photo({
         height={0}
         sizes="100vw"
         style={imageStyle}
+        loading="lazy"
         className="mb-6 rounded"
         onLoad={() => {
           setLoading(false);

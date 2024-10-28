@@ -4,12 +4,13 @@ export default function TopBar() {
   return (
     <div className="flex mb-6 mt-4 justify-between grid-cols-1 md:grid-cols-2">
       <div className="flex gap-6 items-center">
-        <div className="relative w-16 h-16 md:w-24 md:h-24">
+        <div className="relative w-12 h-12 md:w-24 md:h-24">
           <Image
             src={"/images/profile-picture.jpg"}
             alt="profile-picture"
             className="rounded-full"
             fill={true}
+            style={{ objectFit: "contain" }}
           />
         </div>
         <div className="grid md:grid-rows-2 gap-2 md:gap-4 ">

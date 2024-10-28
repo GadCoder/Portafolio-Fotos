@@ -3,7 +3,6 @@ export async function getPhotos() {
   try {
     const request = await fetch(url);
     const result = await request.json();
-    console.log(result);
     return result;
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -11,6 +10,3 @@ export async function getPhotos() {
   }
 }
 
-export function getPhotoDimensions(src: string) {
-  const image = new Image();
-}

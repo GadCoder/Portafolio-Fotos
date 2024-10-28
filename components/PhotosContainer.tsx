@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Photo from "./Photo";
 import { getPhotos } from "@/app/api";
+import ErrorComponent from "./ErrorComponent";
 
 type Photo = {
   id: number;
@@ -10,27 +11,27 @@ type Photo = {
 };
 export default function PhotosContainer() {
   const [listOfPhotos, setListOfPhotos] = useState<Photo[]>([]);
+  const [errorGettingPhotos, setErrorGettingPhotos] = useState<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
       const photos = await getPhotos();
-      if (photos != null) {
-        setListOfPhotos(photos);
+      if (photos == null) {
+        setErrorGettingPhotos(true);
+        return;
       }
+      setListOfPhotos(photos);
     };
 
     fetchData();
   }, []);
 
   const photosArray = listOfPhotos.map((photo: Photo) => (
-    <Photo
-      isHorizontal={photo.is_horizontal}
-      src={photo.photo_url}
-      name={photo.name}
-      key={photo.name}
-    />
+    <Photo src={photo.photo_url} key={photo.name} />
   ));
 
-  return (
+  return errorGettingPhotos ? (
+    <ErrorComponent />
+  ) : (
     <div className="columns-1 md:columns-2 lg:columns-3 gap-6 ">
       {photosArray}
     </div>
