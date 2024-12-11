@@ -345,6 +345,9 @@
   },
   "edgeSSRModuleMapping": {},
   "cssFiles": {
+    "/home/german/Code/Repos/Portafolio-Fotos/app/page": [
+      "static/css/app/page.css"
+    ],
     "/home/german/Code/Repos/Portafolio-Fotos/app/layout": [
       "static/css/app/layout.css"
     ]
@@ -1021,6 +1024,13 @@
         "app-client-internals:static/chunks/app-client-internals.js"
       ],
       "async": false
+    },
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/styles.css#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/page.css"
+      ]
     },
     "/home/german/Code/Repos/Portafolio-Fotos/app/page.tsx": {
       "id": "(app-client)/./app/page.tsx",
