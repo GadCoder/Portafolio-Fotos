@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
 import FadeLoader from "react-spinners/FadeLoader";
 import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
 
-export default function Photo({ src }: { src: string }) {
+export default function Photo({
+  src,
+  isMobile,
+}: {
+  src: string;
+  isMobile: boolean;
+}) {
   const [imageQuality, setImageQuality] = useState(80);
   let [imageIsLoading, setImageIsLoading] = useState(true);
   useEffect(() => {
     if (isMobile) {
-      console.log("Mobile");
       setImageQuality(50);
     }
   }, []);
@@ -21,14 +24,23 @@ export default function Photo({ src }: { src: string }) {
   };
   return (
     <div className="flex  justify-center">
-      {imageIsLoading && <FadeLoader color="#36d7b7" className="m-3" />}
+      {imageIsLoading && (
+        <FadeLoader
+          color="#36d7b7"
+          className="m-3"
+          style={{ width: 120, height: 120 }}
+        />
+      )}
       <Zoom>
         <img
           src={`https://gadsw.dev/cdn-cgi/image/quality=${imageQuality}/${src}`}
-          width={imageIsLoading ? 120 : 0}
-          height={imageIsLoading ? 120 : 0}
+          width={0}
+          height={0}
           sizes="100vw"
-          style={imageStyle}
+          style={{
+            ...imageStyle,
+            display: imageIsLoading ? "none" : "block",
+          }}
           loading="lazy"
           className="mb-6 rounded"
           onLoad={() => {

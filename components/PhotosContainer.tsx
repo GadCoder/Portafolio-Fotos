@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { isMobile } from "react-device-detect";
+
 import Photo from "./Photo";
 import { getPhotos } from "@/app/api";
 import ErrorComponent from "./ErrorComponent";
@@ -26,7 +28,7 @@ export default function PhotosContainer() {
   }, []);
 
   const photosArray = listOfPhotos.map((photo: Photo) => (
-    <Photo src={photo.photo_url} key={photo.name} />
+    <Photo src={photo.photo_url} isMobile={isMobile} key={photo.name} />
   ));
 
   return errorGettingPhotos ? (
