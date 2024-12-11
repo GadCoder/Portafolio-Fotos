@@ -24,23 +24,14 @@ export default function Photo({
   };
   return (
     <div className="flex  justify-center">
-      {imageIsLoading && (
-        <FadeLoader
-          color="#36d7b7"
-          className="m-3"
-          style={{ width: 120, height: 120 }}
-        />
-      )}
+      {imageIsLoading && <FadeLoader color="#36d7b7" className="m-3" />}
       <Zoom>
         <img
           src={`https://gadsw.dev/cdn-cgi/image/quality=${imageQuality}/${src}`}
-          width={0}
-          height={0}
+          width={imageIsLoading ? 120 : 0}
+          height={imageIsLoading ? 120 : 0}
           sizes="100vw"
-          style={{
-            ...imageStyle,
-            display: imageIsLoading ? "none" : "block",
-          }}
+          style={imageStyle}
           loading="lazy"
           className="mb-6 rounded"
           onLoad={() => {
