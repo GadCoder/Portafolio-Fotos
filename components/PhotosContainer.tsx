@@ -14,6 +14,8 @@ type Photo = {
 export default function PhotosContainer() {
   const [listOfPhotos, setListOfPhotos] = useState<Photo[]>([]);
   const [errorGettingPhotos, setErrorGettingPhotos] = useState<boolean>(false);
+  const [imageQuality, setImageQuality] = useState(80);
+  
   useEffect(() => {
     const fetchData = async () => {
       const photos = await getPhotos();
@@ -27,8 +29,14 @@ export default function PhotosContainer() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (isMobile) {
+      setImageQuality(50);
+    }
+  }, []);
+  
   const photosArray = listOfPhotos.map((photo: Photo) => (
-    <Photo src={photo.photo_url} isMobile={isMobile} key={photo.name} />
+    <Photo src={photo.photo_url} imageQuality={imageQuality} key={photo.name} />
   ));
 
   return errorGettingPhotos ? (
