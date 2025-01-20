@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import FadeLoader from "react-spinners/FadeLoader";
 import Zoom from "react-medium-image-zoom";
 
@@ -10,7 +9,6 @@ export default function Photo({
     imageQuality: number 
   
 }) {
-  let [imageIsLoading, setImageIsLoading] = useState(true);
 
   const imageStyle: React.CSSProperties = {
     width: "100%",
@@ -19,8 +17,7 @@ export default function Photo({
   };
 
   return (
-    <div className="flex  justify-center">
-      {imageIsLoading && <FadeLoader color="#36d7b7" className="m-3" />}
+    <div className="flex justify-center">
       <Zoom>
         <img
           src={`https://gadsw.dev/cdn-cgi/image/quality=${imageQuality}/${src}`}
@@ -28,9 +25,6 @@ export default function Photo({
           style={imageStyle}
           loading="lazy"
           className="mb-6 rounded"
-          onLoad={() => {
-            setImageIsLoading(false);
-          }}
         />
       </Zoom>
     </div>
