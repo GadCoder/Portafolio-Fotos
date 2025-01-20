@@ -27,13 +27,11 @@ export default function PhotosContainer() {
     };
 
     fetchData();
-  }, []);
-
-  useEffect(() => {
     if (isMobile) {
-      setImageQuality(50);
+      setImageQuality(45);
     }
   }, []);
+
   
   const photosArray = listOfPhotos.map((photo: Photo) => (
     <Photo src={photo.photo_url} imageQuality={imageQuality} key={photo.name} />
