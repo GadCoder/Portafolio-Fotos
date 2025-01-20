@@ -7,7 +7,7 @@ export default function Photo({
   imageQuality  
 }: {
   src: string;
-    imageQuality: string 
+    imageQuality: number 
   
 }) {
   let [imageIsLoading, setImageIsLoading] = useState(true);
