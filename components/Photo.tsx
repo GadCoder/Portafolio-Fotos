@@ -1,18 +1,17 @@
-import FadeLoader from "react-spinners/FadeLoader";
 import Zoom from "react-medium-image-zoom";
 
 export default function Photo({
   src,
-  imageQuality  
+  imageQuality
 }: {
   src: string;
-    imageQuality: number 
-  
+  imageQuality: number
+
 }) {
 
   const imageStyle: React.CSSProperties = {
     width: "100%",
-    aspectRatio: '4 / 3',
+    height: "auto",
     objectFit: "cover",
   };
 
