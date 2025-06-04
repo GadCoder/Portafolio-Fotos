@@ -1,5 +1,3 @@
-import Image from "next/image";
-import ToggleSwitch from "./ToggleSwitch";
 export default function TopBar() {
   return (
     <div className="flex mb-6 mt-6 justify-center grid-cols-1 md:grid-cols-2">

@@ -230,9 +230,9 @@
         "async": false
       }
     },
-    "(app-client)/./node_modules/react-medium-image-zoom/dist/index.js": {
+    "(app-client)/./components/Photo.tsx": {
       "*": {
-        "id": "(sc_client)/./node_modules/react-medium-image-zoom/dist/index.js",
+        "id": "(sc_client)/./components/Photo.tsx",
         "name": "*",
         "chunks": [
           "app/page:static/chunks/app/page.js"
@@ -240,24 +240,50 @@
         "async": false
       },
       "": {
-        "id": "(sc_client)/./node_modules/react-medium-image-zoom/dist/index.js",
+        "id": "(sc_client)/./components/Photo.tsx",
         "name": "",
         "chunks": [
           "app/page:static/chunks/app/page.js"
         ],
         "async": false
       },
-      "Controlled": {
-        "id": "(sc_client)/./node_modules/react-medium-image-zoom/dist/index.js",
-        "name": "Controlled",
+      "default": {
+        "id": "(sc_client)/./components/Photo.tsx",
+        "name": "default",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      }
+    },
+    "(app-client)/./node_modules/next-themes/dist/index.mjs": {
+      "*": {
+        "id": "(sc_client)/./node_modules/next-themes/dist/index.mjs",
+        "name": "*",
         "chunks": [
           "app/page:static/chunks/app/page.js"
         ],
         "async": false
       },
-      "default": {
-        "id": "(sc_client)/./node_modules/react-medium-image-zoom/dist/index.js",
-        "name": "default",
+      "": {
+        "id": "(sc_client)/./node_modules/next-themes/dist/index.mjs",
+        "name": "",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      },
+      "ThemeProvider": {
+        "id": "(sc_client)/./node_modules/next-themes/dist/index.mjs",
+        "name": "ThemeProvider",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      },
+      "useTheme": {
+        "id": "(sc_client)/./node_modules/next-themes/dist/index.mjs",
+        "name": "useTheme",
         "chunks": [
           "app/page:static/chunks/app/page.js"
         ],
@@ -267,6 +293,9 @@
   },
   "edgeSSRModuleMapping": {},
   "cssFiles": {
+    "/home/german/Code/Repos/Portafolio-Fotos/app/page": [
+      "static/css/app/page.css"
+    ],
     "/home/german/Code/Repos/Portafolio-Fotos/app/layout": [
       "static/css/app/layout.css"
     ]
@@ -944,33 +973,64 @@
       ],
       "async": false
     },
-    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/index.js": {
-      "id": "(app-client)/./node_modules/react-medium-image-zoom/dist/index.js",
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/styles.css#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/page.css"
+      ]
+    },
+    "/home/german/Code/Repos/Portafolio-Fotos/components/Photo.tsx": {
+      "id": "(app-client)/./components/Photo.tsx",
       "name": "*",
       "chunks": [
         "app/page:static/chunks/app/page.js"
       ],
       "async": false
     },
-    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/index.js#": {
-      "id": "(app-client)/./node_modules/react-medium-image-zoom/dist/index.js",
+    "/home/german/Code/Repos/Portafolio-Fotos/components/Photo.tsx#": {
+      "id": "(app-client)/./components/Photo.tsx",
       "name": "",
       "chunks": [
         "app/page:static/chunks/app/page.js"
       ],
       "async": false
     },
-    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/index.js#Controlled": {
-      "id": "(app-client)/./node_modules/react-medium-image-zoom/dist/index.js",
-      "name": "Controlled",
+    "/home/german/Code/Repos/Portafolio-Fotos/components/Photo.tsx#default": {
+      "id": "(app-client)/./components/Photo.tsx",
+      "name": "default",
       "chunks": [
         "app/page:static/chunks/app/page.js"
       ],
       "async": false
     },
-    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/react-medium-image-zoom/dist/index.js#default": {
-      "id": "(app-client)/./node_modules/react-medium-image-zoom/dist/index.js",
-      "name": "default",
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/next-themes/dist/index.mjs": {
+      "id": "(app-client)/./node_modules/next-themes/dist/index.mjs",
+      "name": "*",
+      "chunks": [
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
+    },
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/next-themes/dist/index.mjs#": {
+      "id": "(app-client)/./node_modules/next-themes/dist/index.mjs",
+      "name": "",
+      "chunks": [
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
+    },
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/next-themes/dist/index.mjs#ThemeProvider": {
+      "id": "(app-client)/./node_modules/next-themes/dist/index.mjs",
+      "name": "ThemeProvider",
+      "chunks": [
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
+    },
+    "/home/german/Code/Repos/Portafolio-Fotos/node_modules/next-themes/dist/index.mjs#useTheme": {
+      "id": "(app-client)/./node_modules/next-themes/dist/index.mjs",
+      "name": "useTheme",
       "chunks": [
         "app/page:static/chunks/app/page.js"
       ],
