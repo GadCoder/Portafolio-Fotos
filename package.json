@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
     "lint": "next lint"
   },
@@ -20,6 +20,7 @@
     "eslint-config-next": "13.4.3",
     "next": "^13.4.4",
     "next-themes": "^0.2.1",
+    "plaiceholder": "^3.0.0",
     "postcss": "8.4.23",
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
@@ -27,6 +28,7 @@
     "react-icons": "^4.9.0",
     "react-medium-image-zoom": "^5.2.12",
     "react-spinners": "^0.13.8",
+    "sharp": "^0.34.2",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
   }

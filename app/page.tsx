@@ -1,16 +1,37 @@
-"use client";
-import { ThemeProvider } from "next-themes";
+import { getPhotos } from "@/app/api";
 
 import TopBar from "@/components/TopBar";
-import PhotosContainer from "@/components/PhotosContainer";
+import Photo from "@/components/Photo";
+import ErrorComponent from "@/components/ErrorComponent";
 
-export default function Home() {
+export const dynamic = "force-static";
+
+export default async function Home() {
+  let photos = [];
+  let error = false;
+
+  try {
+    photos = await getPhotos();
+  } catch (err) {
+    error = true;
+  }
+
   return (
-    <ThemeProvider attribute="class">
-      <main className="container-fluid px-5 ">
-        <TopBar />
-        <PhotosContainer />
-      </main>
-    </ThemeProvider>
+    <main className="container-fluid px-5">
+      <TopBar />
+      {error ? (
+        <ErrorComponent />
+      ) : (
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 ">
+          {photos.map((photo) => (
+            <Photo
+              key={photo.name}
+              src={photo.photo_url}
+              imageQuality={typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent) ? 45 : 70}
+            />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
