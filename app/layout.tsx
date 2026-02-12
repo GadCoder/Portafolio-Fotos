@@ -1,12 +1,13 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Portafolio fotográfico",
   description: "Portafolio fotográfico de Germán Ampuero",
   icons: {
-    icon: "/_next/static/media/metadata/favicon.ico",
+    icon: "/favicon.ico",
   },
 };
 

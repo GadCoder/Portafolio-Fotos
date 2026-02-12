@@ -1,8 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url("https://rsms.me/inter/inter.css");
-
 
 [data-rmiz-ghost] {
     position: absolute;

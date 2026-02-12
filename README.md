@@ -1,34 +1,87 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Portafolio Fotográfico
 
-## Getting Started
+Portfolio de fotografía personal de Germán Ampuero. Construido con Next.js 13, TypeScript y Tailwind CSS.
 
-First, run the development server:
+## Tecnologías
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+- **Framework**: Next.js 13 (App Router)
+- **Lenguaje**: TypeScript (Strict Mode)
+- **Estilos**: Tailwind CSS
+- **UI Components**: Material UI (MUI)
+- **Temas**: next-themes (dark/light mode)
+- **Zoom de imágenes**: react-medium-image-zoom
+- **Despliegue**: Static Export (GitHub Pages/Cloudflare Pages compatible)
+
+## Arquitectura
+
+```
+app/
+├── api.tsx          # Cliente API para obtener fotos
+├── layout.tsx       # Layout raíz con metadata y fuentes
+├── page.tsx         # Página principal (static generation)
+├── globals.css      # Estilos globales y Tailwind
+components/
+├── Photo.tsx        # Componente de foto con lazy loading y zoom
+├── TopBar.tsx       # Cabecera del sitio
+├── ErrorComponent.tsx # Estado de error
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Contract
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El portfolio consume datos de `https://portfolio-api.gadcoder.com/photo/get-all-photos/`
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+**Respuesta esperada**:
+```typescript
+interface Photo {
+  id: number;
+  name: string;
+  photo_url: string;
+  is_horizontal: boolean;
+}
+```
 
-## Learn More
+**Manejo de errores**: Si la API falla, el componente muestra `ErrorComponent` en lugar de crashear.
 
-To learn more about Next.js, take a look at the following resources:
+## Optimizaciones de Imágenes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **CDN**: Cloudflare Images con transformación on-the-fly
+- **Formatos**: Auto-conversión a WebP/AVIF
+- **Lazy loading**: Imágenes fuera del viewport no se cargan
+- **Responsive**: srcset para diferentes tamaños de pantalla
+- **Skeleton**: Placeholder animado mientras carga
+- **Aspect ratio preservado**: Evita layout shift
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Scripts disponibles
 
-## Deploy on Vercel
+```bash
+npm run dev      # Servidor de desarrollo
+npm run build    # Build de producción (static export)
+npm run lint     # ESLint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+El proyecto usa `output: 'export'` para generar archivos estáticos en la carpeta `dist/`.
+
+```bash
+npm run build
+# Los archivos estáticos están en ./dist
+```
+
+## Requisitos
+
+- Node.js 18+
+- npm o yarn
+
+## Instalación
+
+```bash
+npm install
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+---
+
+© 2024 Germán Ampuero
