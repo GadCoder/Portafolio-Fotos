@@ -1,36 +1,38 @@
-# Portafolio Fotográfico
+# Photography Portfolio
 
-Portfolio de fotografía personal de Germán Ampuero. Construido con Next.js 13, TypeScript y Tailwind CSS.
+Personal photography portfolio by Germán Ampuero. Built with Next.js 13, TypeScript, and Tailwind CSS.
 
-## Tecnologías
+## Tech Stack
 
 - **Framework**: Next.js 13 (App Router)
-- **Lenguaje**: TypeScript (Strict Mode)
-- **Estilos**: Tailwind CSS
+- **Language**: TypeScript (Strict Mode)
+- **Styling**: Tailwind CSS
 - **UI Components**: Material UI (MUI)
-- **Temas**: next-themes (dark/light mode)
-- **Zoom de imágenes**: react-medium-image-zoom
-- **Despliegue**: Static Export (GitHub Pages/Cloudflare Pages compatible)
+- **Themes**: next-themes (dark/light mode)
+- **Image Zoom**: react-medium-image-zoom
+- **Deployment**: Static Export (GitHub Pages / Cloudflare Pages compatible)
 
-## Arquitectura
+## Architecture
 
-```
+```text
 app/
-├── api.tsx          # Cliente API para obtener fotos
-├── layout.tsx       # Layout raíz con metadata y fuentes
-├── page.tsx         # Página principal (static generation)
-├── globals.css      # Estilos globales y Tailwind
+├── api.tsx            # API client for fetching photos
+├── layout.tsx         # Root layout with metadata and fonts
+├── page.tsx           # Main page (static generation)
+├── globals.css        # Global styles and Tailwind
 components/
-├── Photo.tsx        # Componente de foto con lazy loading y zoom
-├── TopBar.tsx       # Cabecera del sitio
-├── ErrorComponent.tsx # Estado de error
+├── Photo.tsx          # Photo component with lazy loading and zoom
+├── TopBar.tsx         # Site header
+├── ErrorComponent.tsx # Error state UI
 ```
 
 ## API Contract
 
-El portfolio consume datos de `https://portfolio-api.gadcoder.com/photo/get-all-photos/`
+The portfolio consumes data from:
+`https://portfolio-api.gadcoder.com/photo/get-all-photos/`
 
-**Respuesta esperada**:
+**Expected response:**
+
 ```typescript
 interface Photo {
   id: number;
@@ -40,47 +42,47 @@ interface Photo {
 }
 ```
 
-**Manejo de errores**: Si la API falla, el componente muestra `ErrorComponent` en lugar de crashear.
+**Error handling:** If the API fails, the app renders `ErrorComponent` instead of crashing.
 
-## Optimizaciones de Imágenes
+## Image Optimizations
 
-- **CDN**: Cloudflare Images con transformación on-the-fly
-- **Formatos**: Auto-conversión a WebP/AVIF
-- **Lazy loading**: Imágenes fuera del viewport no se cargan
-- **Responsive**: srcset para diferentes tamaños de pantalla
-- **Skeleton**: Placeholder animado mientras carga
-- **Aspect ratio preservado**: Evita layout shift
+- **CDN**: Cloudflare Images with on-the-fly transformations
+- **Formats**: Auto-conversion to WebP/AVIF
+- **Lazy loading**: Offscreen images are deferred
+- **Responsive**: `srcset` for multiple viewport sizes
+- **Skeleton**: Animated placeholder while loading
+- **Preserved aspect ratio**: Prevents layout shift
 
-## Scripts disponibles
+## Available Scripts
 
 ```bash
-npm run dev      # Servidor de desarrollo
-npm run build    # Build de producción (static export)
+npm run dev      # Development server
+npm run build    # Production build (static export)
 npm run lint     # ESLint
 ```
 
 ## Deployment
 
-El proyecto usa `output: 'export'` para generar archivos estáticos en la carpeta `dist/`.
+The project uses `output: 'export'` to generate static files in `dist/`.
 
 ```bash
 npm run build
-# Los archivos estáticos están en ./dist
+# Static output is generated in ./dist
 ```
 
-## Requisitos
+## Requirements
 
 - Node.js 18+
-- npm o yarn
+- npm or yarn
 
-## Instalación
+## Installation
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
