@@ -2,7 +2,6 @@
 
 import Zoom from "react-medium-image-zoom";
 import { useMemo, useState, useEffect, useRef } from "react";
-import "react-medium-image-zoom/dist/styles.css";
 
 interface PhotoProps {
   src: string;
