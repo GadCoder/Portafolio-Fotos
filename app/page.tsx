@@ -1,5 +1,5 @@
 import { getPhotos } from "@/app/api";
-import Photo from "@/components/Photo";
+import PhotoGallery from "@/components/PhotoGallery";
 import TopBar from "@/components/TopBar";
 import { Providers } from "@/components/Providers";
 import ErrorComponent from "@/components/ErrorComponent";
@@ -17,17 +17,7 @@ export default async function Home() {
         {hasError ? (
           <ErrorComponent />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-6">
-            {photos.map((photo) => (
-              <Photo
-                key={photo.id}
-                src={photo.photo_url}
-                alt={photo.name}
-                width={photo.is_horizontal ? 1200 : 800}
-                height={photo.is_horizontal ? 800 : 1200}
-              />
-            ))}
-          </div>
+          <PhotoGallery photos={photos} />
         )}
       </main>
     </Providers>
