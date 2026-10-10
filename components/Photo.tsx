@@ -40,7 +40,7 @@ export default function Photo({ src, alt, width, height }: PhotoProps) {
 
   return (
     <div
-      className="relative w-full mb-6 overflow-hidden rounded"
+      className="relative w-full overflow-hidden rounded"
       style={{ paddingBottom: `${aspectRatio}%` }}
     >
       {!loaded && (

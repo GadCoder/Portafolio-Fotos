@@ -17,7 +17,7 @@ export default async function Home() {
         {hasError ? (
           <ErrorComponent />
         ) : (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-6">
             {photos.map((photo) => (
               <Photo
                 key={photo.id}
