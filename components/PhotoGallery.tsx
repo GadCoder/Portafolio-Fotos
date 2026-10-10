@@ -32,14 +32,16 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
   }, []);
 
   const columns = getColumnCount(galleryWidth);
+  const tracks = columns === 1 ? 1 : columns * 2;
   const rows = useMemo(() => {
     const groupedPhotos: { photo: GalleryPhoto; span: number }[][] = [];
     let row: { photo: GalleryPhoto; span: number }[] = [];
     let occupiedColumns = 0;
 
     photos.forEach((photo) => {
-      const span = columns > 1 && photo.is_horizontal ? 2 : 1;
-      if (row.length > 0 && occupiedColumns + span > columns) {
+      const span =
+        columns === 1 ? 1 : photo.is_horizontal ? columns : 2;
+      if (row.length > 0 && occupiedColumns + span > tracks) {
         groupedPhotos.push(row);
         row = [];
         occupiedColumns = 0;
@@ -51,13 +53,26 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
 
     if (row.length > 0) groupedPhotos.push(row);
 
-    const lastRow = groupedPhotos[groupedPhotos.length - 1];
-    if (columns > 2 && lastRow?.length === 1 && lastRow[0].photo.is_horizontal) {
-      lastRow[0].span = columns;
-    }
+    groupedPhotos.forEach((photoRow) => {
+      const usedColumns = photoRow.reduce((total, item) => total + item.span, 0);
+      const remainingColumns = tracks - usedColumns;
+      const horizontalPhoto = photoRow.find((item) => item.photo.is_horizontal);
+
+      if (horizontalPhoto && remainingColumns > 0) {
+        horizontalPhoto.span += remainingColumns;
+      } else if (
+        columns > 2 &&
+        photoRow.length === 2 &&
+        photoRow.every((item) => !item.photo.is_horizontal)
+      ) {
+        photoRow.forEach((item) => {
+          item.span = tracks / 2;
+        });
+      }
+    });
 
     return groupedPhotos;
-  }, [columns, photos]);
+  }, [columns, photos, tracks]);
 
   return (
     <div ref={galleryRef} className="flex flex-col gap-6">
@@ -65,7 +80,7 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
         <div
           key={rowIndex}
           className="grid items-start gap-6"
-          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${tracks}, minmax(0, 1fr))` }}
         >
           {row.map(({ photo, span }) => (
             <div key={photo.id} style={{ gridColumn: `span ${span}` }}>
