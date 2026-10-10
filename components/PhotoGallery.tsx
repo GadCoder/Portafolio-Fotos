@@ -10,6 +10,10 @@ type GalleryPhoto = {
   name: string;
 };
 
+const COLUMN_GAP = 24;
+const ROW_TRACK_HEIGHT = 8;
+const ROW_GAP = 8;
+
 function getColumnCount(width: number) {
   if (width < 768) return 1;
   if (width < 1024) return 2;
@@ -32,66 +36,38 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
   }, []);
 
   const columns = getColumnCount(galleryWidth);
-  const tracks = columns === 1 ? 1 : columns * 2;
-  const rows = useMemo(() => {
-    const groupedPhotos: { photo: GalleryPhoto; span: number }[][] = [];
-    let row: { photo: GalleryPhoto; span: number }[] = [];
-    let occupiedColumns = 0;
-
-    photos.forEach((photo) => {
-      const span =
-        columns === 1 ? 1 : photo.is_horizontal ? columns : 2;
-      if (row.length > 0 && occupiedColumns + span > tracks) {
-        groupedPhotos.push(row);
-        row = [];
-        occupiedColumns = 0;
-      }
-
-      row.push({ photo, span });
-      occupiedColumns += span;
-    });
-
-    if (row.length > 0) groupedPhotos.push(row);
-
-    groupedPhotos.forEach((photoRow) => {
-      const usedColumns = photoRow.reduce((total, item) => total + item.span, 0);
-      const remainingColumns = tracks - usedColumns;
-      const horizontalPhoto = photoRow.find((item) => item.photo.is_horizontal);
-
-      if (horizontalPhoto && remainingColumns > 0) {
-        horizontalPhoto.span += remainingColumns;
-      } else if (
-        columns > 2 &&
-        photoRow.length === 2 &&
-        photoRow.every((item) => !item.photo.is_horizontal)
-      ) {
-        photoRow.forEach((item) => {
-          item.span = tracks / 2;
-        });
-      }
-    });
-
-    return groupedPhotos;
-  }, [columns, photos, tracks]);
+  const columnWidth =
+    (galleryWidth - COLUMN_GAP * (columns - 1)) / columns;
+  const rowSpans = useMemo(
+    () =>
+      photos.map((photo) => {
+        const aspectRatio = photo.is_horizontal ? 3 / 2 : 2 / 3;
+        const imageHeight = columnWidth / aspectRatio;
+        return Math.ceil(
+          (imageHeight + ROW_GAP) / (ROW_TRACK_HEIGHT + ROW_GAP)
+        );
+      }),
+    [columnWidth, photos]
+  );
 
   return (
-    <div ref={galleryRef} className="flex flex-col gap-6">
-      {rows.map((row, rowIndex) => (
-        <div
-          key={rowIndex}
-          className="grid items-start gap-6"
-          style={{ gridTemplateColumns: `repeat(${tracks}, minmax(0, 1fr))` }}
-        >
-          {row.map(({ photo, span }) => (
-            <div key={photo.id} style={{ gridColumn: `span ${span}` }}>
-              <Photo
-                src={photo.photo_url}
-                alt={photo.name}
-                width={photo.is_horizontal ? 1200 : 800}
-                height={photo.is_horizontal ? 800 : 1200}
-              />
-            </div>
-          ))}
+    <div
+      ref={galleryRef}
+      className="grid grid-cols-1 grid-flow-row-dense items-start md:grid-cols-2 lg:grid-cols-3"
+      style={{
+        gridAutoRows: `${ROW_TRACK_HEIGHT}px`,
+        columnGap: `${COLUMN_GAP}px`,
+        rowGap: `${ROW_GAP}px`,
+      }}
+    >
+      {photos.map((photo, index) => (
+        <div key={photo.id} style={{ gridRowEnd: `span ${rowSpans[index]}` }}>
+          <Photo
+            src={photo.photo_url}
+            alt={photo.name}
+            width={photo.is_horizontal ? 1200 : 800}
+            height={photo.is_horizontal ? 800 : 1200}
+          />
         </div>
       ))}
     </div>
