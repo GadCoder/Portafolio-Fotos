@@ -1,7 +1,18 @@
 @import "tailwindcss";
 
+:root {
+  --background: #f7f7f5;
+  --foreground: #242424;
+  --muted-foreground: #666666;
+}
+
 @theme {
   --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 [data-rmiz-ghost] {
