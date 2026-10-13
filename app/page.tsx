@@ -10,12 +10,14 @@ export default async function Home() {
   const hasError = photos.length === 0;
 
   return (
-    <main className="container-fluid px-5">
+    <main className="page-shell" id="top">
       <TopBar />
       {hasError ? (
         <ErrorComponent />
       ) : (
-        <PhotoGallery photos={photos} />
+        <section className="work-section" id="work" aria-label="Fotografías">
+          <PhotoGallery photos={photos} />
+        </section>
       )}
     </main>
   );

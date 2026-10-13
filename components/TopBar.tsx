@@ -1,16 +1,28 @@
 export default function TopBar() {
   return (
-    <div className="flex mb-6 mt-6 justify-center">
-      <div className="flex gap-6 items-center">
-        <div className="grid md:grid-rows-2 gap-2 md:gap-4">
-          <h1 className="text-[32px] font-normal leading-tight text-[var(--foreground)] md:text-[40px]">
-            Germán Ampuero
-          </h1>
-          <h2 className="text-center text-sm font-normal text-[var(--muted-foreground)] md:text-xl">
-            A veces tomo fotos
-          </h2>
+    <>
+      <header className="site-header">
+        <a className="site-label" href="#top" aria-label="Inicio del portafolio fotográfico">
+          Portafolio fotográfico
+        </a>
+        <nav className="site-nav" aria-label="Navegación principal">
+          <a href="#work" className="active" aria-current="page">
+            Fotografías
+          </a>
+          <a href="#work">Series</a>
+          <a href="#about">Sobre mí</a>
+        </nav>
+      </header>
+
+      <section className="introduction" id="about" aria-labelledby="photographer-name">
+        <h1 className="portfolio-title" id="photographer-name">
+          Germán Ampuero
+        </h1>
+        <div className="introduction-meta">
+          <p>A veces tomo fotos.</p>
+          <p className="location">Lima, Perú — 2026</p>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

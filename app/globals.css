@@ -3,7 +3,9 @@
 :root {
   --background: #f7f7f5;
   --foreground: #242424;
-  --muted-foreground: #666666;
+  --secondary: #666666;
+  --muted: #777777;
+  --divider: #dedcd7;
 }
 
 @theme {
@@ -13,6 +15,165 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
+  margin: 0;
+}
+
+.page-shell {
+  width: min(100% - 96px, 1440px);
+  margin-inline: auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.site-label,
+.site-nav a,
+.introduction-meta,
+.gallery-heading {
+  font-family: inherit;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.site-label {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.site-nav a {
+  color: var(--secondary);
+  font-size: 13px;
+  transition: color 180ms ease;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+  color: var(--foreground);
+}
+
+.site-nav a:focus-visible,
+.site-label:focus-visible {
+  outline: 1px solid var(--foreground);
+  outline-offset: 5px;
+}
+
+.introduction {
+  padding-top: 68px;
+  padding-bottom: 44px;
+  scroll-margin-top: 24px;
+}
+
+.portfolio-title {
+  margin: 0;
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 300;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.introduction-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.introduction-meta p {
+  margin: 0;
+}
+
+.introduction-meta .location {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.work-section {
+  border-top: 1px solid var(--divider);
+  padding-top: 20px;
+  scroll-margin-top: 24px;
+}
+
+@media (max-width: 1023px) {
+  .page-shell {
+    width: min(100% - 64px, 1440px);
+  }
+
+  .introduction {
+    padding-top: 56px;
+    padding-bottom: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-shell {
+    width: calc(100% - 40px);
+  }
+
+  .site-header {
+    padding: 22px 0 18px;
+  }
+
+  .site-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .site-nav {
+    gap: 16px;
+  }
+
+  .site-nav a {
+    font-size: 12px;
+  }
+
+  .introduction {
+    padding-top: 48px;
+    padding-bottom: 28px;
+  }
+
+  .work-section {
+    padding-top: 18px;
+  }
+
+  .introduction-meta {
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-top: 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-label {
+    font-size: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  .site-nav {
+    gap: 10px;
+  }
+
+  .site-nav a {
+    font-size: 11px;
+  }
 }
 
 [data-rmiz-ghost] {
