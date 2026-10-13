@@ -20,6 +20,13 @@ export default function Photo({ src, alt, width, height }: PhotoProps) {
     return `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=70,format=auto/${cleanUrl}`;
   }, [src]);
 
+  // Load a larger rendition in the modal so landscape photos can use more of
+  // a desktop viewport without making the gallery thumbnails download it.
+  const zoomSrc = useMemo(() => {
+    const cleanUrl = src.replace("https://portfolio.cdn.gadcoder.com/", "");
+    return `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=85,format=auto,w=2400/${cleanUrl}`;
+  }, [src]);
+
   // Smaller quality for mobile viewports via srcset
   const srcSet = useMemo(() => {
     const cleanUrl = src.replace("https://portfolio.cdn.gadcoder.com/", "");
@@ -47,7 +54,7 @@ export default function Photo({ src, alt, width, height }: PhotoProps) {
         <div className="absolute inset-0 bg-gray-700 animate-pulse rounded" />
       )}
 
-      <Zoom>
+      <Zoom zoomImg={{ src: zoomSrc, alt }} zoomMargin={24}>
         <img
           ref={imgRef}
           src={optimizedSrc}
