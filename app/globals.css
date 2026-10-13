@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+}
 
 [data-rmiz-ghost] {
     position: absolute;

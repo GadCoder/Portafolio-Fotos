@@ -1,14 +1,13 @@
 # Photography Portfolio
 
-Personal photography portfolio by Germán Ampuero. Built with Next.js 13, TypeScript, and Tailwind CSS.
+Personal photography portfolio by Germán Ampuero. Built with Next.js 16, TypeScript, and Tailwind CSS 4.
 
 ## Tech Stack
 
-- **Framework**: Next.js 13 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript (Strict Mode)
-- **Styling**: Tailwind CSS
-- **UI Components**: Material UI (MUI)
-- **Themes**: next-themes (dark/light mode)
+- **Styling**: Tailwind CSS 4
+- **Typography**: Satoshi
 - **Image Zoom**: react-medium-image-zoom
 - **Deployment**: Static Export (GitHub Pages / Cloudflare Pages compatible)
 
@@ -63,16 +62,16 @@ npm run lint     # ESLint
 
 ## Deployment
 
-The project uses `output: 'export'` to generate static files in `dist/`.
+The project uses `output: 'export'` to generate static files in `out/`.
 
 ```bash
 npm run build
-# Static output is generated in ./dist
+# Static output is generated in ./out
 ```
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 24 LTS
 - npm or yarn
 
 ## Installation
