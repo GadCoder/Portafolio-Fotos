@@ -16,28 +16,6 @@ export type GalleryPhoto = PhotoPresentation & {
   height?: number | null;
 };
 
-export type IndexedPhoto = { photo: GalleryPhoto; index: number };
-export type PhotoGroup =
-  | { kind: "masonry"; photos: IndexedPhoto[] }
-  | { kind: "featured"; entry: IndexedPhoto };
-
-/** Partition the supplied order without sorting or dropping entries. */
-export function groupPhotos(photos: readonly GalleryPhoto[]): PhotoGroup[] {
-  const groups: PhotoGroup[] = [];
-  let regular: IndexedPhoto[] = [];
-  photos.forEach((photo, index) => {
-    if (photo.featured) {
-      if (regular.length) groups.push({ kind: "masonry", photos: regular });
-      regular = [];
-      groups.push({ kind: "featured", entry: { photo, index } });
-    } else {
-      regular.push({ photo, index });
-    }
-  });
-  if (regular.length) groups.push({ kind: "masonry", photos: regular });
-  return groups;
-}
-
 export function imageDimensions(photo: GalleryPhoto) {
   return {
     width: photo.width && photo.width > 0 ? photo.width : photo.is_horizontal ? 1200 : 800,

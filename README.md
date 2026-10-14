@@ -53,17 +53,30 @@ interface Photo {
 
 ## Editorial gallery
 
-In the API admin, select **Destacar fotografía**, choose **Ancho completo** or
-**Centrada (70%)**, optionally enter caption metadata, and save the presentation.
-Uncheck the featured option to return a photograph to the regular masonry gallery.
-Selections are stored in the API database; no photo IDs or positions are hardcoded
-in the frontend. `seriesSlug` is metadata only; series pages are not implemented.
+In the API admin, open **Editar** on a photo, select **Destacar fotografía**,
+optionally enter caption metadata, and save. Uncheck the featured option to
+restore regular presentation. Selections remain in the API database;
+`seriesSlug` remains metadata only.
 
-`lib/photos.ts` contains the pure `groupPhotos` function. It splits the API's order
-into regular masonry groups and individual featured sections. DOM order and
-lightbox navigation use that same order. Regular photos use three columns on
-desktop, two on tablet, and one on mobile; featured sections show optional title
-(falling back to location) and year captions.
+`lib/gallery-layout.ts` contains the pure `packGallery` function. All photos share
+one continuous packed gallery with three desktop columns, two tablet columns, and
+one mobile column. It computes placement from each image's intrinsic aspect ratio
+and measured caption height; images retain their proportions without cropping.
+
+Featured landscape images (aspect ratio at least 1.2) prefer a two-column span
+when adjacent lanes have room and the source is large enough. Expansion is
+rejected when it would leave a hole larger than 64px (or 20% of a column).
+`featuredLayout: "contained"` uses a stricter 10% alignment threshold; "wide"
+uses the broader threshold. These existing metadata values are packing hints,
+and no longer create standalone sections. Portrait features stay in a single
+column with their optional caption, allowing surrounding photos to continue
+alongside them. No manual placement or extra layout dependency is required.
+
+Photos are considered in API order, placed into the earliest gap that fits, with
+leftmost placement breaking ties. Later photos can fill smaller gaps above
+previous photos, so strict visual order yields to compact packing. DOM order,
+focus order, and lightbox navigation always preserve the original API sequence.
+The bottom edge can remain uneven, as in a regular masonry gallery.
 
 The static export includes photos at build time and refreshes them from the API
 when the gallery mounts. Saved admin changes appear on the next visit or reload,
