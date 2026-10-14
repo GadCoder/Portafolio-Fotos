@@ -38,10 +38,42 @@ interface Photo {
   name: string;
   photo_url: string;
   is_horizontal: boolean;
+  width?: number | null;
+  height?: number | null;
+  featured?: boolean;
+  featuredLayout?: "wide" | "contained" | null;
+  title?: string | null;
+  location?: string | null;
+  year?: number | null;
+  seriesSlug?: string | null;
 }
 ```
 
 **Error handling:** If the API fails, the app renders `ErrorComponent` instead of crashing.
+
+## Editorial gallery
+
+In the API admin, select **Destacar fotografía**, choose **Ancho completo** or
+**Centrada (70%)**, optionally enter caption metadata, and save the presentation.
+Uncheck the featured option to return a photograph to the regular masonry gallery.
+Selections are stored in the API database; no photo IDs or positions are hardcoded
+in the frontend. `seriesSlug` is metadata only; series pages are not implemented.
+
+`lib/photos.ts` contains the pure `groupPhotos` function. It splits the API's order
+into regular masonry groups and individual featured sections. DOM order and
+lightbox navigation use that same order. Regular photos use three columns on
+desktop, two on tablet, and one on mobile; featured sections show optional title
+(falling back to location) and year captions.
+
+The static export includes photos at build time and refreshes them from the API
+when the gallery mounts. Saved admin changes appear on the next visit or reload,
+without rebuilding the frontend. If that refresh fails, the initial photos remain.
+New uploads include their intrinsic dimensions. Existing photos reserve their
+legacy orientation ratio until the loaded image supplies its actual aspect ratio.
+
+Deploy the API with its `20261014_01` migration before deploying the frontend.
+The API container applies migrations on startup; other environments should run
+`uv run alembic upgrade head` in the API repository.
 
 ## Image Optimizations
 
@@ -49,8 +81,8 @@ interface Photo {
 - **Formats**: Auto-conversion to WebP/AVIF
 - **Lazy loading**: Offscreen images are deferred
 - **Responsive**: `srcset` for multiple viewport sizes
-- **Skeleton**: Animated placeholder while loading
-- **Preserved aspect ratio**: Prevents layout shift
+- **Loading priority**: The first photograph loads eagerly; remaining photos load lazily
+- **Preserved aspect ratio**: Uses intrinsic dimensions when supplied; legacy records are corrected on load
 
 ## Available Scripts
 
