@@ -58,25 +58,29 @@ optionally enter caption metadata, and save. Uncheck the featured option to
 restore regular presentation. Selections remain in the API database;
 `seriesSlug` remains metadata only.
 
-`lib/gallery-layout.ts` contains the pure `packGallery` function. All photos share
-one continuous packed gallery with three desktop columns, two tablet columns, and
-one mobile column. It computes placement from each image's intrinsic aspect ratio
-and measured caption height; images retain their proportions without cropping.
+`lib/gallery-layout.ts` contains the pure `packGallery` function. Regular rows
+justify three photos on desktop and two on tablet using a shared image height
+and widths derived from aspect ratios. Mobile uses a natural single-column flow.
+Images are never cropped or distorted.
 
-Featured landscape images (aspect ratio at least 1.2) prefer a two-column span
-when adjacent lanes have room and the source is large enough. Expansion is
-rejected when it would leave a hole larger than 64px (or 20% of a column).
-`featuredLayout: "contained"` uses a stricter 10% alignment threshold; "wide"
-uses the broader threshold. These existing metadata values are packing hints,
-and no longer create standalone sections. Portrait features stay in a single
-column with their optional caption, allowing surrounding photos to continue
-alongside them. No manual placement or extra layout dependency is required.
+Desktop features receive a larger allocation, paired with a stack of one to four
+nearby regular photographs. Their widths are calculated so the feature and the
+stack reach the same bottom edge, including caption height and gaps. This gives
+portrait features visible prominence without an empty neighbouring column.
+Companions come from at most the next twelve pending photographs. The algorithm
+prefers a feature width near two normal columns, subject to source size limits.
+On tablet, featured landscapes can occupy the full row; portraits remain in a
+regular row. On mobile, all photos use the available width. Extremely narrow
+portraits and small sources retain a smaller allocation to avoid excessive height
+or upscaling. Known source dimensions cap every image; legacy sources without
+dimensions use a conservative 1200px cap until their actual ratio is loaded.
 
-Photos are considered in API order, placed into the earliest gap that fits, with
-leftmost placement breaking ties. Later photos can fill smaller gaps above
-previous photos, so strict visual order yields to compact packing. DOM order,
-focus order, and lightbox navigation always preserve the original API sequence.
-The bottom edge can remain uneven, as in a regular masonry gallery.
+Photos retain their original DOM, focus, and lightbox order. The visual layout
+can bring a nearby feature forward and move its companion photos alongside it;
+this bounded change in visual sequence keeps the gallery compact. Final partial
+rows retain a smaller footprint. `featuredLayout` metadata is preserved, and both
+values use the integrated presentation rather than isolated sections. No manual
+placement or additional layout dependency is required.
 
 The static export includes photos at build time and refreshes them from the API
 when the gallery mounts. Saved admin changes appear on the next visit or reload,

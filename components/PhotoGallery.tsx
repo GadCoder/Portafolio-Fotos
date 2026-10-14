@@ -22,12 +22,13 @@ function ContinuousGallery({ photos }: { photos: GalleryPhoto[] }) {
       const layoutPhotos = photos.map((photo, index) => {
         const dimensions = imageDimensions(photo);
         const image = contents[index]?.querySelector<HTMLImageElement>(".gallery-photo-image");
+        const measuredRatio = image?.closest<HTMLElement>(".gallery-photo")?.style.aspectRatio.split("/").map(Number);
         const caption = contents[index]?.querySelector<HTMLElement>(".featured-caption");
         return {
-          aspectRatio: image?.naturalWidth && image.naturalHeight
-            ? image.naturalWidth / image.naturalHeight
+          aspectRatio: measuredRatio?.[0] && measuredRatio[1]
+            ? measuredRatio[0] / measuredRatio[1]
             : dimensions.width / dimensions.height,
-          intrinsicWidth: dimensions.width,
+          intrinsicWidth: photo.width ?? 1200,
           featured: photo.featured,
           featuredLayout: photo.featuredLayout,
           captionHeight: caption ? caption.getBoundingClientRect().height + parseFloat(getComputedStyle(caption).marginTop) : 0,
@@ -38,12 +39,13 @@ function ContinuousGallery({ photos }: { photos: GalleryPhoto[] }) {
         const item = contents[index]?.parentElement;
         if (!item) return;
         item.style.width = columns === 1 ? "" : `${placement.width}px`;
-        item.style.left = `${placement.column * ((containerWidth - gap * (columns - 1)) / columns + gap)}px`;
+        item.style.left = `${placement.left}px`;
         item.style.top = `${placement.top}px`;
         item.dataset.column = String(placement.column + 1);
         item.dataset.span = String(placement.span);
         const image = contents[index].querySelector<HTMLImageElement>(".gallery-photo-image");
-        if (image) image.sizes = `${Math.ceil(Math.min(placement.width, layoutPhotos[index].intrinsicWidth))}px`;
+        const sizes = `${Math.ceil(Math.min(placement.width, layoutPhotos[index].intrinsicWidth))}px`;
+        if (image && image.sizes !== sizes) image.sizes = sizes;
       });
       grid.style.height = columns === 1 ? "" : `${Math.max(...placements.map((placement) => placement.top + placement.height)) + parseFloat(styles.paddingBottom)}px`;
       grid.dataset.measured = "true";
@@ -65,7 +67,7 @@ function ContinuousGallery({ photos }: { photos: GalleryPhoto[] }) {
                 src={photo.photo_url}
                 alt={photo.name}
                 {...imageDimensions(photo)}
-                intrinsicWidth={photo.width ?? undefined}
+                intrinsicWidth={photo.width ?? 1200}
                 index={index}
                 priority={index === 0}
                 sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) calc((100vw - 88px) / 2), (max-width: 1535px) calc((100vw - 144px) / 3), 464px"
