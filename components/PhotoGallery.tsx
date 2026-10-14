@@ -1,73 +1,93 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Photo from "@/components/Photo";
 import { GalleryLightboxProvider } from "@/components/GalleryLightbox";
 import { fetchPhotos } from "@/app/api";
-import { groupPhotos, imageDimensions, type GalleryPhoto, type IndexedPhoto } from "@/lib/photos";
+import { imageDimensions, type GalleryPhoto } from "@/lib/photos";
+import { packGallery } from "@/lib/gallery-layout";
 
-function GalleryImage({ entry, featured = false }: { entry: IndexedPhoto; featured?: boolean }) {
-  const { photo, index } = entry;
-  return (
-    <Photo
-      src={photo.photo_url}
-      alt={photo.name}
-      {...imageDimensions(photo)}
-      intrinsicWidth={photo.width ?? undefined}
-      index={index}
-      priority={index === 0}
-      sizes={featured
-        ? photo.featuredLayout === "contained"
-          ? "(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) 70vw, (max-width: 1535px) 70vw, 1008px"
-          : "(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) calc(100vw - 64px), (max-width: 1535px) calc(100vw - 96px), 1440px"
-        : "(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) calc((100vw - 88px) / 2), (max-width: 1535px) calc((100vw - 144px) / 3), 464px"}
-    />
-  );
-}
-
-function MasonryGroup({ entries }: { entries: IndexedPhoto[] }) {
+function ContinuousGallery({ photos }: { photos: GalleryPhoto[] }) {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const grid = gridRef.current;
-    if (!grid) return;
+    if (!grid || !photos.length) return;
     const observer = new ResizeObserver(() => {
       const styles = getComputedStyle(grid);
-      if (styles.display !== "grid") return;
+      const columns = parseInt(styles.getPropertyValue("--gallery-columns"), 10);
       const gap = parseFloat(styles.getPropertyValue("--photo-gap"));
-      const columns = styles.gridTemplateColumns.split(" ").length;
-      const heights = Array<number>(columns).fill(0);
-      grid.querySelectorAll<HTMLElement>(".masonry-content").forEach((content) => {
-        const item = content.parentElement;
-        if (!item) return;
-        const column = heights.indexOf(Math.min(...heights));
-        const span = Math.ceil(content.getBoundingClientRect().height + gap);
-        item.style.gridColumnStart = String(column + 1);
-        item.style.gridRowStart = String(heights[column] + 1);
-        item.style.gridRowEnd = `span ${span}`;
-        heights[column] += span;
+      const containerWidth = grid.getBoundingClientRect().width;
+      const contents = Array.from(grid.querySelectorAll<HTMLElement>(".editorial-content"));
+      const layoutPhotos = photos.map((photo, index) => {
+        const dimensions = imageDimensions(photo);
+        const image = contents[index]?.querySelector<HTMLImageElement>(".gallery-photo-image");
+        const measuredRatio = image?.closest<HTMLElement>(".gallery-photo")?.style.aspectRatio.split("/").map(Number);
+        const caption = contents[index]?.querySelector<HTMLElement>(".featured-caption");
+        return {
+          aspectRatio: measuredRatio?.[0] && measuredRatio[1]
+            ? measuredRatio[0] / measuredRatio[1]
+            : dimensions.width / dimensions.height,
+          intrinsicWidth: photo.width ?? 1200,
+          featured: photo.featured,
+          featuredLayout: photo.featuredLayout,
+          captionHeight: caption ? caption.getBoundingClientRect().height + parseFloat(getComputedStyle(caption).marginTop) : 0,
+        };
       });
+      const placements = packGallery(layoutPhotos, containerWidth, columns, gap);
+      placements.forEach((placement, index) => {
+        const item = contents[index]?.parentElement;
+        if (!item) return;
+        item.style.width = columns === 1 ? "" : `${placement.width}px`;
+        item.style.left = `${placement.left}px`;
+        item.style.top = `${placement.top}px`;
+        item.dataset.column = String(placement.column + 1);
+        item.dataset.span = String(placement.span);
+        const image = contents[index].querySelector<HTMLImageElement>(".gallery-photo-image");
+        const sizes = `${Math.ceil(Math.min(placement.width, layoutPhotos[index].intrinsicWidth))}px`;
+        if (image && image.sizes !== sizes) image.sizes = sizes;
+      });
+      grid.style.height = columns === 1 ? "" : `${Math.max(...placements.map((placement) => placement.top + placement.height)) + parseFloat(styles.paddingBottom)}px`;
       grid.dataset.measured = "true";
     });
     observer.observe(grid);
-    grid.querySelectorAll(".masonry-content").forEach((content) => observer.observe(content));
+    grid.querySelectorAll(".editorial-content").forEach((content) => observer.observe(content));
     return () => observer.disconnect();
-  }, [entries]);
+  }, [photos]);
 
   return (
-    <div ref={gridRef} className="photo-masonry">
-      {entries.map((entry) => (
-        <div className="masonry-item" key={entry.photo.id}>
-          <div className="masonry-content"><GalleryImage entry={entry} /></div>
-        </div>
-      ))}
+    <div ref={gridRef} className="editorial-gallery">
+      {photos.map((photo, index) => {
+        const caption = photo.title?.trim() || photo.location?.trim();
+        const hasCaption = photo.featured && (Boolean(caption) || photo.year != null);
+        return (
+          <div className="editorial-item" data-featured={photo.featured || undefined} key={photo.id}>
+            <figure className="editorial-content">
+              <Photo
+                src={photo.photo_url}
+                alt={photo.name}
+                {...imageDimensions(photo)}
+                intrinsicWidth={photo.width ?? 1200}
+                index={index}
+                priority={index === 0}
+                sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) calc((100vw - 88px) / 2), (max-width: 1535px) calc((100vw - 144px) / 3), 464px"
+              />
+              {hasCaption && (
+                <figcaption className="featured-caption">
+                  <span>{caption}</span>
+                  {photo.year != null && <span className="featured-year">{photo.year}</span>}
+                </figcaption>
+              )}
+            </figure>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 export default function PhotoGallery({ photos: initialPhotos }: { photos: GalleryPhoto[] }) {
   const [photos, setPhotos] = useState(initialPhotos);
-  const groups = useMemo(() => groupPhotos(photos), [photos]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -80,30 +100,7 @@ export default function PhotoGallery({ photos: initialPhotos }: { photos: Galler
 
   return (
     <GalleryLightboxProvider photos={photos}>
-      <div className="editorial-gallery">
-        {groups.map((group) => {
-          if (group.kind === "masonry") {
-            return <MasonryGroup key={`masonry-${group.photos[0].photo.id}`} entries={group.photos} />;
-          }
-          const { photo } = group.entry;
-          const caption = photo.title?.trim() || photo.location?.trim();
-          const hasCaption = Boolean(caption) || photo.year != null;
-          return (
-            <section className={`featured-photo featured-photo--${photo.featuredLayout ?? "wide"}`} key={photo.id} aria-label={caption || photo.name}>
-              <figure className="featured-figure" style={{ maxWidth: imageDimensions(photo).width }}>
-                <GalleryImage entry={group.entry} featured />
-                {hasCaption && (
-                  <figcaption className="featured-caption">
-                    <span>{caption}</span>
-                    {photo.year != null && <span className="featured-year">{photo.year}</span>}
-                  </figcaption>
-                )}
-              </figure>
-            </section>
-          );
-        })}
-        {!photos.length && <p className="gallery-empty">Todavía no hay fotografías.</p>}
-      </div>
+      {photos.length ? <ContinuousGallery photos={photos} /> : <p className="gallery-empty">Todavía no hay fotografías.</p>}
     </GalleryLightboxProvider>
   );
 }

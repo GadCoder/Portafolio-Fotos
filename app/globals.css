@@ -114,26 +114,30 @@ body {
 
 .editorial-gallery {
   --photo-gap: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 72px;
-  padding-bottom: 72px;
-}
-
-.photo-masonry {
+  --gallery-columns: 3;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
   column-gap: var(--photo-gap);
+  row-gap: var(--photo-gap);
   align-items: start;
+  padding-bottom: 48px;
 }
 
-.photo-masonry[data-measured="true"] {
-  grid-auto-rows: 1px;
-  margin-bottom: calc(-1 * var(--photo-gap));
+.editorial-gallery[data-measured="true"] {
+  display: block;
+  position: relative;
 }
 
-.masonry-item {
+.editorial-gallery[data-measured="true"] .editorial-item {
+  position: absolute;
+}
+
+.editorial-item {
   min-width: 0;
+}
+
+.editorial-content {
+  margin: 0;
 }
 
 .gallery-photo {
@@ -156,19 +160,6 @@ body {
   object-fit: contain;
 }
 
-.featured-photo:first-child {
-  margin-top: 72px;
-}
-
-.featured-figure {
-  width: 100%;
-  margin: 0 auto;
-}
-
-.featured-photo--contained .featured-figure {
-  width: 70%;
-}
-
 .featured-caption {
   display: flex;
   align-items: baseline;
@@ -179,6 +170,7 @@ body {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .featured-year {
@@ -220,9 +212,10 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .photo-masonry {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .editorial-gallery {
+    --gallery-columns: 2;
   }
+
   .page-shell {
     width: min(100% - 64px, 1440px);
   }
@@ -236,28 +229,20 @@ body {
 @media (max-width: 767px) {
   .editorial-gallery {
     --photo-gap: 16px;
-    gap: 44px;
-    padding-bottom: 44px;
+    --gallery-columns: 1;
+    padding-bottom: 32px;
   }
 
-  .photo-masonry,
-  .photo-masonry[data-measured="true"] {
+  .editorial-gallery,
+  .editorial-gallery[data-measured="true"] {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: var(--photo-gap);
-    margin-bottom: 0;
   }
 
-  .masonry-item {
-    width: 100%;
-  }
-
-  .featured-photo:first-child {
-    margin-top: 44px;
-  }
-
-  .featured-photo--contained .featured-figure {
-    width: 100%;
+  .editorial-gallery[data-measured="true"] .editorial-item {
+    position: static;
   }
 
   .featured-caption {

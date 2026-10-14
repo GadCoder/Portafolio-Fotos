@@ -53,17 +53,34 @@ interface Photo {
 
 ## Editorial gallery
 
-In the API admin, select **Destacar fotografía**, choose **Ancho completo** or
-**Centrada (70%)**, optionally enter caption metadata, and save the presentation.
-Uncheck the featured option to return a photograph to the regular masonry gallery.
-Selections are stored in the API database; no photo IDs or positions are hardcoded
-in the frontend. `seriesSlug` is metadata only; series pages are not implemented.
+In the API admin, open **Editar** on a photo, select **Destacar fotografía**,
+optionally enter caption metadata, and save. Uncheck the featured option to
+restore regular presentation. Selections remain in the API database;
+`seriesSlug` remains metadata only.
 
-`lib/photos.ts` contains the pure `groupPhotos` function. It splits the API's order
-into regular masonry groups and individual featured sections. DOM order and
-lightbox navigation use that same order. Regular photos use three columns on
-desktop, two on tablet, and one on mobile; featured sections show optional title
-(falling back to location) and year captions.
+`lib/gallery-layout.ts` contains the pure `packGallery` function. Regular rows
+justify three photos on desktop and two on tablet using a shared image height
+and widths derived from aspect ratios. Mobile uses a natural single-column flow.
+Images are never cropped or distorted.
+
+Desktop features receive a larger allocation, paired with a stack of one to four
+nearby regular photographs. Their widths are calculated so the feature and the
+stack reach the same bottom edge, including caption height and gaps. This gives
+portrait features visible prominence without an empty neighbouring column.
+Companions come from at most the next twelve pending photographs. The algorithm
+prefers a feature width near two normal columns, subject to source size limits.
+On tablet, featured landscapes can occupy the full row; portraits remain in a
+regular row. On mobile, all photos use the available width. Extremely narrow
+portraits and small sources retain a smaller allocation to avoid excessive height
+or upscaling. Known source dimensions cap every image; legacy sources without
+dimensions use a conservative 1200px cap until their actual ratio is loaded.
+
+Photos retain their original DOM, focus, and lightbox order. The visual layout
+can bring a nearby feature forward and move its companion photos alongside it;
+this bounded change in visual sequence keeps the gallery compact. Final partial
+rows retain a smaller footprint. `featuredLayout` metadata is preserved, and both
+values use the integrated presentation rather than isolated sections. No manual
+placement or additional layout dependency is required.
 
 The static export includes photos at build time and refreshes them from the API
 when the gallery mounts. Saved admin changes appear on the next visit or reload,

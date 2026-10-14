@@ -18,6 +18,7 @@ interface PhotoProps {
 
 export default function Photo({ src, alt, width, height, intrinsicWidth, index, priority = false, sizes }: PhotoProps) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const ratioRef = useRef<{ src: string; ratio: string } | null>(null);
   const gallery = useContext(GalleryLightboxContext);
   const srcSet = [480, 800, 1200, 1600, 2400]
     .map((size) => `${optimizedPhotoUrl(src, size, size <= 480 ? 45 : size <= 800 ? 70 : 85)} ${size}w`)
@@ -26,14 +27,22 @@ export default function Photo({ src, alt, width, height, intrinsicWidth, index, 
   function revealImage(image: HTMLImageElement) {
     // Older API records lack dimensions. Correct their reserved ratio after loading.
     if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
+      // Responsive rendition changes can round density-corrected dimensions differently.
+      // Keep the first loaded source ratio stable when its rendition/size changes.
+      if (ratioRef.current?.src !== src) {
+        ratioRef.current = { src, ratio: `${image.naturalWidth} / ${image.naturalHeight}` };
+      }
+      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", ratioRef.current.ratio);
     }
   }
 
   useEffect(() => {
     if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
       const image = imgRef.current;
-      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
+      if (ratioRef.current?.src !== src) {
+        ratioRef.current = { src, ratio: `${image.naturalWidth} / ${image.naturalHeight}` };
+      }
+      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", ratioRef.current.ratio);
     }
   }, [src]);
 
