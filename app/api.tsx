@@ -1,24 +1,17 @@
-type Photo = {
-  id: number;
-  is_horizontal: boolean;
-  photo_url: string;
-  name: string;
-};
+import type { GalleryPhoto } from "@/lib/photos";
 
-export async function getPhotos(): Promise<Photo[]> {
-  const url: string = "https://portfolio-api.gadcoder.com/photo/get-all-photos/";
+export async function fetchPhotos(signal?: AbortSignal): Promise<GalleryPhoto[]> {
+  const response = await fetch("https://portfolio-api.gadcoder.com/photo/get-all-photos/",
+    signal ? { signal, cache: "no-store" } : undefined);
+  if (!response.ok) throw new Error(`Photo API: HTTP ${response.status}`);
+  const result = await response.json();
+  if (!Array.isArray(result)) throw new Error("Photo API: expected an array");
+  return result;
+}
+
+export async function getPhotos(): Promise<GalleryPhoto[]> {
   try {
-    const request = await fetch(url);
-    if (!request.ok) {
-      console.error("HTTP error:", request.status, request.statusText);
-      return [];
-    }
-    const result = await request.json();
-    if (!Array.isArray(result)) {
-      console.error("Invalid data format: expected array");
-      return [];
-    }
-    return result;
+    return await fetchPhotos();
   } catch (error) {
     console.error("Error fetching data:", error);
     return [];

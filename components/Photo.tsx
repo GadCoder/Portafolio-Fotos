@@ -1,72 +1,63 @@
 "use client";
 
 import Zoom from "react-medium-image-zoom";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
+import { GalleryLightboxContext, GalleryZoomContent } from "@/components/GalleryLightbox";
+import { optimizedPhotoUrl } from "@/lib/photos";
 
 interface PhotoProps {
   src: string;
   alt: string;
   width: number;
   height: number;
+  intrinsicWidth?: number;
+  index: number;
+  priority?: boolean;
+  sizes: string;
 }
 
-export default function Photo({ src, alt, width, height }: PhotoProps) {
-  const [loaded, setLoaded] = useState(false);
+export default function Photo({ src, alt, width, height, intrinsicWidth, index, priority = false, sizes }: PhotoProps) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const gallery = useContext(GalleryLightboxContext);
+  const srcSet = [480, 800, 1200, 1600, 2400]
+    .map((size) => `${optimizedPhotoUrl(src, size, size <= 480 ? 45 : size <= 800 ? 70 : 85)} ${size}w`)
+    .join(", ");
 
-  // Responsive quality: smaller images for mobile via CSS srcset, quality handled by CDN
-  const optimizedSrc = useMemo(() => {
-    const cleanUrl = src.replace("https://portfolio.cdn.gadcoder.com/", "");
-    return `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=70,format=auto/${cleanUrl}`;
-  }, [src]);
-
-  // Load a larger rendition in the modal so landscape photos can use more of
-  // a desktop viewport without making the gallery thumbnails download it.
-  const zoomSrc = useMemo(() => {
-    const cleanUrl = src.replace("https://portfolio.cdn.gadcoder.com/", "");
-    return `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=85,format=auto,w=2400/${cleanUrl}`;
-  }, [src]);
-
-  // Smaller quality for mobile viewports via srcset
-  const srcSet = useMemo(() => {
-    const cleanUrl = src.replace("https://portfolio.cdn.gadcoder.com/", "");
-    // Generate responsive URLs at different quality points
-    const lowQuality = `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=45,format=auto,w=480/${cleanUrl} 480w`;
-    const mediumQuality = `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=70,format=auto,w=800/${cleanUrl} 800w`;
-    const highQuality = `https://portfolio.cdn.gadcoder.com/cdn-cgi/image/quality=85,format=auto,w=1200/${cleanUrl} 1200w`;
-    return `${lowQuality}, ${mediumQuality}, ${highQuality}`;
-  }, [src]);
-
-  const aspectRatio = (height / width) * 100;
+  function revealImage(image: HTMLImageElement) {
+    // Older API records lack dimensions. Correct their reserved ratio after loading.
+    if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
+    }
+  }
 
   useEffect(() => {
-    if (imgRef.current?.complete) {
-      setLoaded(true);
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      const image = imgRef.current;
+      image.closest<HTMLElement>(".gallery-photo")?.style.setProperty("aspect-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
     }
-  }, []);
+  }, [src]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden rounded"
-      style={{ paddingBottom: `${aspectRatio}%` }}
-    >
-      {!loaded && (
-        <div className="absolute inset-0 bg-gray-700 animate-pulse rounded" />
-      )}
-
-      <Zoom zoomImg={{ src: zoomSrc, alt }} zoomMargin={24}>
+    <div className="gallery-photo" style={{ aspectRatio: `${width} / ${height}`, maxWidth: intrinsicWidth ?? width }}>
+      <Zoom
+        zoomImg={{ src: optimizedPhotoUrl(src, 2400, 85), srcSet: "", alt }}
+        zoomMargin={24}
+        a11yNameButtonZoom="Ampliar fotografía"
+        a11yNameButtonUnzoom="Cerrar fotografía"
+        onZoomChange={(isZoomed) => { if (isZoomed) gallery?.open(index); }}
+        ZoomContent={GalleryZoomContent}
+      >
         <img
           ref={imgRef}
-          src={optimizedSrc}
+          src={optimizedPhotoUrl(src)}
           srcSet={srcSet}
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes={sizes}
           alt={alt}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           decoding="async"
-          onLoad={() => setLoaded(true)}
-          className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-500 ease-in ${
-            loaded ? "opacity-100" : "opacity-0"
-          }`}
+          onLoad={(event) => revealImage(event.currentTarget)}
+          className="gallery-photo-image"
           width={width}
           height={height}
         />
