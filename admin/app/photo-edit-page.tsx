@@ -38,7 +38,7 @@ export default function PhotoEditPage({ photo, session }: { photo: Photo; sessio
   return <main className="admin-shell">
     <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Edit photo</h1></div><div className="account"><span>{session.user}</span><a className="quiet link-button" href="/">Photo library</a></div></header>
     <section className="editor-page">
-      <div className="editor-preview"><img src={adminPhotoUrl(photo.photo_url)} alt={photo.title || photo.name} /><p>{photo.name}</p></div>
+      <div className="editor-preview"><img src={adminPhotoUrl(photo.photo_url, 1400)} alt={photo.title || photo.name} /><p>{photo.name}</p></div>
       <form className="edit-form editor-form" onSubmit={save}>
         <div><h2>Photo presentation</h2><p className="muted">Update how this image appears in the portfolio.</p></div>
         {error && <p className="message error" role="alert">{error}</p>}
