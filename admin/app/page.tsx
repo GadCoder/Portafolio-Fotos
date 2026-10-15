@@ -23,7 +23,7 @@ export default function AdminPage() {
   const [draft, setDraft] = useState<EditState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Photo | null>(null);
   const [uploadProgress, setUploadProgress] = useState('');
-  const [uploadResults, setUploadResults] = useState<string[]>([]);
+  const [uploadResults, setUploadResults] = useState<Array<{ filename: string; success: boolean; message: string }>>([]);
 
   const loadPhotos = useCallback(async () => {
     const result = await apiRequest<Photo[]>('/photos');
@@ -79,18 +79,22 @@ export default function AdminPage() {
       const results = await apiRequest<unknown>('/photos/upload', {
         method: 'POST', csrfToken: session.csrf_token, files,
       });
-      const rows = Array.isArray(results) ? results : [results];
-      setUploadResults(rows.map((result, index) => {
-        if (!result || typeof result !== 'object') return `File ${index + 1}: ${String(result)}`;
-        const item = result as Record<string, unknown>;
-        const rawName = item.filename ?? item.name ?? item.file;
-        const filename = typeof rawName === 'string' ? rawName : `File ${index + 1}`;
-        const rawMessage = item.message ?? item.detail ?? item.error ?? item.status;
-        const message = typeof rawMessage === 'string' ? rawMessage : JSON.stringify(result);
-        return `${filename}: ${message}`;
-      }));
+      const rows = results && typeof results === 'object' && 'results' in results && Array.isArray(results.results)
+        ? results.results
+        : [];
+      const parsed = rows.map((result, index) => {
+        const item = result && typeof result === 'object' ? result as Record<string, unknown> : {};
+        const filename = typeof item.filename === 'string' ? item.filename : `File ${index + 1}`;
+        const success = item.success === true;
+        const detail = success ? item.stored_name : item.error;
+        return { filename, success, message: typeof detail === 'string' ? detail : (success ? 'Uploaded' : 'Upload failed.') };
+      });
+      setUploadResults(parsed);
       await loadPhotos();
-      setNotice('Upload finished. Per-file results are listed below.');
+      if (parsed.length) {
+        const succeeded = parsed.filter((result) => result.success).length;
+        setNotice(`${succeeded} of ${parsed.length} file${parsed.length === 1 ? '' : 's'} uploaded successfully.`);
+      }
       input.value = '';
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Upload failed.'); }
     finally { setBusy(false); setUploadProgress(''); }
@@ -150,7 +154,7 @@ export default function AdminPage() {
     {uploadProgress && <p className="message" role="status" aria-live="polite">{uploadProgress}</p>}
     {error && <p className="message error" role="alert">{error}</p>}
     {notice && <p className="message success" role="status">{notice}</p>}
-    {uploadResults.length > 0 && <ul className="upload-results" aria-label="Per-file upload results" aria-live="polite">{uploadResults.map((result, index) => <li key={`${index}-${result}`}>{result}</li>)}</ul>}
+    {uploadResults.length > 0 && <ul className="upload-results" aria-label="Per-file upload results" aria-live="polite">{uploadResults.map((result, index) => <li key={`${index}-${result.filename}`} className={result.success ? 'upload-success' : 'upload-failure'}><strong>{result.filename}</strong>: <span>{result.success ? 'Success' : 'Failed'}</span> — {result.message}</li>)}</ul>}
     {!photos.length ? <section className="empty"><h2>No photos yet</h2><p>Upload images to begin building your portfolio.</p></section> :
       <section className="gallery" aria-label="Photos">
         {photos.map((photo) => <article className="photo-card" key={photo.id}>

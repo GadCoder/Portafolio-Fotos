@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminPage from '../app/page';
 
 const session = { authenticated: true, user: 'admin', csrf_token: 'token' };
 const photo = { id: 7, is_horizontal: true, photo_url: 'https://images.test/rain.jpg', name: 'rain.jpg', width: 1200, height: 800, featured: false, featuredLayout: null, title: null, location: null, year: null, seriesSlug: null, created_at: '2026-01-01' };
 
-function mockApi(uploadResults: unknown[] = []) {
+function mockApi(uploadResults: unknown = { results: [] }) {
   const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url.endsWith('/session')) return Response.json(session);
@@ -38,10 +38,10 @@ describe('admin gallery', () => {
   });
 
   it('uploads multiple files and shows every per-file API result', async () => {
-    const fetch = mockApi([
-      { filename: 'first.jpg', success: true, message: 'Uploaded' },
-      { filename: 'second.jpg', success: false, message: 'Unsupported image' },
-    ]);
+    const fetch = mockApi({ results: [
+      { filename: 'first.jpg', success: true, stored_name: 'stored-first.jpg' },
+      { filename: 'second.jpg', success: false, error: 'Unsupported image' },
+    ] });
     const user = userEvent.setup();
     render(<AdminPage />);
     await screen.findByRole('heading', { name: 'rain.jpg' });
@@ -50,8 +50,14 @@ describe('admin gallery', () => {
       new File(['two'], 'second.jpg', { type: 'image/jpeg' }),
     ]);
     await user.click(screen.getByRole('button', { name: 'Upload selected' }));
-    expect(await screen.findByText(/first\.jpg.*Uploaded/i)).toBeInTheDocument();
-    expect(screen.getByText(/second\.jpg.*Unsupported image/i)).toBeInTheDocument();
+    const results = await screen.findByRole('list', { name: 'Per-file upload results' });
+    expect(within(results).getByText('first.jpg')).toBeInTheDocument();
+    expect(within(results).getByText('Success')).toBeInTheDocument();
+    expect(within(results).getByText(/stored-first\.jpg/)).toBeInTheDocument();
+    expect(within(results).getByText('second.jpg')).toBeInTheDocument();
+    expect(within(results).getByText('Failed')).toBeInTheDocument();
+    expect(within(results).getByText(/Unsupported image/)).toBeInTheDocument();
+    expect(screen.queryByText('Upload finished. Per-file results are listed below.')).not.toBeInTheDocument();
     const request = fetch.mock.calls.find(([url]) => String(url).endsWith('/upload'))?.[1];
     expect(request?.headers).toMatchObject({ 'X-CSRF-Token': 'token' });
     expect((request?.body as FormData).getAll('files')).toHaveLength(2);

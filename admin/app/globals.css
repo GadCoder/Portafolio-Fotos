@@ -47,6 +47,8 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .success { border-color: #a7c9b3; color: #175c43; }
 .upload-results { margin: -8px 0 18px; padding-left: 28px; color: var(--muted); font-size: .9rem; }
 .upload-results li { padding: 4px 0; }
+.upload-success span { color: var(--green); font-weight: 700; }
+.upload-failure span { color: var(--red); font-weight: 700; }
 .empty { padding: 72px 24px; border: 1px dashed #bdc9c1; border-radius: 8px; text-align: center; color: var(--muted); }
 .empty h2 { margin-bottom: 8px; color: var(--ink); }
 .login-shell, .loading-screen { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
