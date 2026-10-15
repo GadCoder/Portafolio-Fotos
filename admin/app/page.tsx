@@ -153,7 +153,7 @@ export default function AdminPage() {
     {!photos.length ? <section className="empty"><h2>No photos yet</h2><p>Upload images to begin building your portfolio.</p></section> :
       <section className="gallery" aria-label="Photos">
         {photos.map((photo) => <article className="photo-card" key={photo.id}>
-          <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" />{photo.featured && <span className="badge">Featured</span>}</div>
+          <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url, 640)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" />{photo.featured && <span className="badge">Featured</span>}</div>
           <div className="photo-content"><div className="photo-heading"><h2>{photo.title || photo.name}</h2><span>{photo.width ?? '—'} × {photo.height ?? '—'}</span></div>
             {(photo.location || photo.year || photo.seriesSlug) && <p className="meta">{[photo.location, photo.year, photo.seriesSlug].filter(Boolean).join(' · ')}</p>}
             <div className="actions"><a className="quiet link-button" href={`/photos/${photo.id}/edit`}>Edit</a><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>
