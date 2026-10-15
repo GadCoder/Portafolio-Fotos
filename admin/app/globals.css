@@ -65,6 +65,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .message { margin: 0 0 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 5px; background: white; }
 .error { border-color: #e4b8b8; color: #872525; }
 .success { border-color: #b9cce0; color: #315c89; }
+.toast { position: fixed; z-index: 10; right: 24px; bottom: 24px; max-width: min(420px, calc(100vw - 32px)); padding: 14px 18px; border: 1px solid #b9cce0; border-radius: 7px; background: #fff; color: #315c89; box-shadow: 0 10px 32px #17211e24; font-weight: 650; }
 .upload-results { margin: -8px 0 18px; padding-left: 28px; color: var(--muted); font-size: .9rem; }
 .upload-results li { padding: 4px 0; }
 .upload-success span { color: #315c89; font-weight: 700; }
@@ -93,6 +94,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
   .edit-dialog .editor-form { padding: 16px; }
   .editor-preview img { max-height: 52vh; }
   .editor-form { padding: 18px; }
+  .toast { right: 16px; bottom: 16px; }
   .upload-form { width: 100%; align-items: stretch; flex-direction: column; }
   .file-picker { justify-content: space-between; gap: 8px; }
   .file-picker input { width: 60%; }

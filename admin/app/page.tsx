@@ -9,6 +9,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [toast, setToast] = useState('');
   const [credentials, setCredentials] = useState({ user: '', password: '' });
   const [busy, setBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Photo | null>(null);
@@ -46,6 +47,12 @@ export default function AdminPage() {
     const dialog = editDialogRef.current;
     if (editTarget && dialog && !dialog.open) dialog.showModal();
   }, [editTarget]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(''), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
   function closeEditDialog() {
     editDialogRef.current?.close();
@@ -159,6 +166,7 @@ export default function AdminPage() {
     {uploadProgress && <p className="message" role="status" aria-live="polite">{uploadProgress}</p>}
     {error && <p className="message error" role="alert">{error}</p>}
     {notice && <p className="message success" role="status">{notice}</p>}
+    {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
     {uploadResults.length > 0 && <ul className="upload-results" aria-label="Per-file upload results" aria-live="polite">{uploadResults.map((result, index) => <li key={`${index}-${result.filename}`} className={result.success ? 'upload-success' : 'upload-failure'}><strong>{result.filename}</strong>: <span>{result.success ? 'Success' : 'Failed'}</span> — {result.message}</li>)}</ul>}
     {!photos.length ? <section className="empty"><h2>No photos yet</h2><p>Upload images to begin building your portfolio.</p></section> :
       <section className="gallery" aria-label="Photos">
@@ -184,7 +192,7 @@ export default function AdminPage() {
     }}>
       {editTarget && <PhotoEditPage key={editTarget.id} photo={editTarget} session={session} onCancel={closeEditDialog} onSaved={(updated) => {
         setPhotos((items) => items.map((item) => item.id === updated.id ? updated : item));
-        setNotice('Photo presentation updated.');
+        setToast('Photo saved successfully.');
         closeEditDialog();
       }} />}
     </dialog>
