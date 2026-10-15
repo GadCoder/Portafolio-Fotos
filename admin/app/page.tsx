@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { apiRequest, type Photo, type Presentation, type SessionResponse } from '../lib/api';
 
@@ -24,6 +24,9 @@ export default function AdminPage() {
   const [deleteTarget, setDeleteTarget] = useState<Photo | null>(null);
   const [uploadProgress, setUploadProgress] = useState('');
   const [uploadResults, setUploadResults] = useState<Array<{ filename: string; success: boolean; message: string }>>([]);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const galleryHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const loadPhotos = useCallback(async () => {
     const result = await apiRequest<Photo[]>('/photos');
@@ -41,6 +44,20 @@ export default function AdminPage() {
     }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [loadPhotos]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (deleteTarget && dialog && !dialog.open) dialog.showModal();
+  }, [deleteTarget]);
+
+  function closeDeleteDialog(removed = false) {
+    setDeleteTarget(null);
+    requestAnimationFrame(() => {
+      const opener = openerRef.current;
+      if (!removed && opener?.isConnected) opener.focus();
+      else galleryHeadingRef.current?.focus();
+    });
+  }
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,13 +96,13 @@ export default function AdminPage() {
       const results = await apiRequest<unknown>('/photos/upload', {
         method: 'POST', csrfToken: session.csrf_token, files,
       });
-      const rows = results && typeof results === 'object' && 'results' in results && Array.isArray(results.results)
-        ? results.results
-        : [];
-      const parsed = rows.map((result, index) => {
-        const item = result && typeof result === 'object' ? result as Record<string, unknown> : {};
+      if (!results || typeof results !== 'object' || !('results' in results) || !Array.isArray(results.results) || !results.results.every((item) => item && typeof item === 'object' && 'success' in item && typeof item.success === 'boolean')) {
+        throw new Error('Invalid upload response: expected { results: [{ success: boolean, ... }] }.');
+      }
+      const parsed = results.results.map((result, index) => {
+        const item = result as Record<string, unknown>;
         const filename = typeof item.filename === 'string' ? item.filename : `File ${index + 1}`;
-        const success = item.success === true;
+        const success = item.success as boolean;
         const detail = success ? item.stored_name : item.error;
         return { filename, success, message: typeof detail === 'string' ? detail : (success ? 'Uploaded' : 'Upload failed.') };
       });
@@ -126,7 +143,8 @@ export default function AdminPage() {
     try {
       await apiRequest(`/photos/${deleteTarget.id}`, { method: 'DELETE', csrfToken: session.csrf_token });
       setPhotos((items) => items.filter((item) => item.id !== deleteTarget.id));
-      setDeleteTarget(null); setNotice('Photo deleted.');
+      setNotice('Photo deleted.');
+      closeDeleteDialog(true);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Delete failed.'); }
     finally { setBusy(false); }
   }
@@ -148,7 +166,7 @@ export default function AdminPage() {
   return <main className="admin-shell">
     <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
     <section className="toolbar" aria-label="Photo management">
-      <div><h2>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Manage your images and editorial presentation.</p></div>
+      <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Manage your images and editorial presentation.</p></div>
       <form className="upload-form" onSubmit={upload}><label className="file-picker">Choose images<input name="files" type="file" accept="image/*" multiple /></label><button className="primary" disabled={busy}>Upload selected</button></form>
     </section>
     {uploadProgress && <p className="message" role="status" aria-live="polite">{uploadProgress}</p>}
@@ -169,10 +187,12 @@ export default function AdminPage() {
               <label>Year<input type="number" min="1800" max="2200" value={draft.year ?? ''} onChange={(event) => setDraft({ ...draft, year: event.target.value === '' ? null : Number(event.target.value) })} /></label>
               <label>Series slug<input value={draft.seriesSlug ?? ''} onChange={(event) => setDraft({ ...draft, seriesSlug: event.target.value })} /></label>
               <div className="actions"><button className="primary" disabled={busy}>Save changes</button><button type="button" className="quiet" onClick={() => { setEditing(null); setDraft(null); }}>Cancel</button></div>
-            </form> : <div className="actions"><button className="quiet" onClick={() => { setEditing(photo.id); setDraft(emptyPresentation(photo)); }}>Edit</button><button className="danger" onClick={() => setDeleteTarget(photo)}>Delete</button></div>}
+            </form> : <div className="actions"><button className="quiet" onClick={() => { setEditing(photo.id); setDraft(emptyPresentation(photo)); }}>Edit</button><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>}
           </div>
         </article>)}
       </section>}
-    {deleteTarget && <div className="dialog-backdrop"><section className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-heading" aria-describedby="delete-description"><h2 id="delete-heading">Delete this photo?</h2><p id="delete-description">“{deleteTarget.name}” will be permanently removed from the portfolio.</p><div className="actions"><button className="danger" onClick={() => void removePhoto()} disabled={busy}>Delete photo</button><button className="quiet" onClick={() => setDeleteTarget(null)} disabled={busy}>Cancel</button></div></section></div>}
+    <dialog ref={dialogRef} className="dialog" aria-labelledby="delete-heading" aria-describedby="delete-description" onCancel={(event) => { event.preventDefault(); dialogRef.current?.close(); closeDeleteDialog(); }} onClose={() => { if (deleteTarget && !busy) { setDeleteTarget(null); requestAnimationFrame(() => { const opener = openerRef.current; if (opener?.isConnected) opener.focus(); else galleryHeadingRef.current?.focus(); }); } }}>
+      {deleteTarget && <><h2 id="delete-heading">Delete this photo?</h2><p id="delete-description">“{deleteTarget.name}” will be permanently removed from the portfolio.</p><div className="actions"><button className="danger" onClick={() => void removePhoto()} disabled={busy}>Delete photo</button><button className="quiet" onClick={() => { dialogRef.current?.close(); closeDeleteDialog(); }} disabled={busy}>Cancel</button></div></>}
+    </dialog>
   </main>;
 }

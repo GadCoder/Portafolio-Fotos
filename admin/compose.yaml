@@ -1,0 +1,16 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ADMIN_API_ORIGIN: ${ADMIN_API_ORIGIN:-https://portfolio-api.gadcoder.com}
+    ports:
+      - "127.0.0.1:${ADMIN_HOST_PORT:-39002}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

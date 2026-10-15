@@ -92,6 +92,14 @@ Deploy the API with its `20261014_01` migration before deploying the frontend.
 The API container applies migrations on startup; other environments should run
 `uv run alembic upgrade head` in the API repository.
 
+## Dokploy and private access
+
+Deploy the standalone admin using **Dokploy Compose configuration**, with `admin/` as the Compose project directory and `admin/compose.yaml` as its recipe. Set `ADMIN_API_ORIGIN` before build to the API origin the admin should proxy to. Set `ADMIN_HOST_PORT` if needed (default `39002`). The recipe binds only `127.0.0.1:${ADMIN_HOST_PORT}:3000` on the host; keep the app listening on container port `3000`.
+
+This is **not** a public-domain or Traefik-routed app. Do not attach a domain, enable public routing, or add public routing labels. Confirm Dokploy shows no public route for this Compose service. Configure Tailscale Serve separately to proxy to `http://127.0.0.1:${ADMIN_HOST_PORT}` (default `http://127.0.0.1:39002`). Use Serve only: do not configure Funnel or public DNS/domain access.
+
+The compose healthcheck probes the admin's local `/api/health` endpoint.
+
 ## Image Optimizations
 
 - **CDN**: Cloudflare Images with on-the-fly transformations

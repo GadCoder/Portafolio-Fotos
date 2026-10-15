@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminPage from '../app/page';
 
@@ -21,6 +21,20 @@ function mockApi(uploadResults: unknown = { results: [] }) {
 }
 
 describe('admin gallery', () => {
+  it.each([{}, { results: 'bad' }, { results: [{ filename: 'x.jpg' }] }])('rejects malformed upload response %j without completing upload', async (response) => {
+    const fetch = mockApi(response);
+    const user = userEvent.setup();
+    render(<AdminPage />);
+    await screen.findByRole('heading', { name: 'rain.jpg' });
+    const input = screen.getByLabelText('Choose images') as HTMLInputElement;
+    await user.upload(input, new File(['x'], 'x.jpg', { type: 'image/jpeg' }));
+    await user.click(screen.getByRole('button', { name: 'Upload selected' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/invalid upload response/i);
+    expect(screen.queryByText(/uploaded successfully/i)).not.toBeInTheDocument();
+    expect(fetch.mock.calls.filter(([url]) => String(url).endsWith('/photos') && !String(url).endsWith('/upload'))).toHaveLength(1);
+    expect(input.files).toHaveLength(1);
+  });
+
   it('restores session, renders photos, and saves edited presentation fields', async () => {
     const fetch = mockApi();
     const user = userEvent.setup();
@@ -68,10 +82,26 @@ describe('admin gallery', () => {
     const user = userEvent.setup();
     render(<AdminPage />);
     await screen.findByRole('heading', { name: 'rain.jpg' });
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    const opener = screen.getByRole('button', { name: /delete/i });
+    const showModal = vi.fn(function (this: HTMLDialogElement) { this.setAttribute('open', ''); });
+    const close = vi.fn(function (this: HTMLDialogElement) { this.removeAttribute('open'); fireEvent(this, new Event('close')); });
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: showModal });
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', { configurable: true, value: close });
+    await user.click(opener);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(showModal).toHaveBeenCalled();
     expect(fetch.mock.calls.some(([url, init]) => String(url).endsWith('/photos/7') && init?.method === 'DELETE')).toBe(false);
+    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
+    await waitFor(() => expect(close).toHaveBeenCalled());
+    expect(fetch.mock.calls.some(([url, init]) => String(url).endsWith('/photos/7') && init?.method === 'DELETE')).toBe(false);
+    await waitFor(() => expect(opener).toHaveFocus());
+    await user.click(opener);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(fetch.mock.calls.some(([url, init]) => String(url).endsWith('/photos/7') && init?.method === 'DELETE')).toBe(false);
+    await waitFor(() => expect(opener).toHaveFocus());
+    await user.click(opener);
     await user.click(screen.getByRole('button', { name: 'Delete photo' }));
     await waitFor(() => expect(fetch.mock.calls.some(([url, init]) => String(url).endsWith('/photos/7') && init?.method === 'DELETE')).toBe(true));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Photo library/ })).toHaveFocus());
   });
 });
