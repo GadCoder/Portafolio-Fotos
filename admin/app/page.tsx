@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [notice, setNotice] = useState('');
   const [credentials, setCredentials] = useState({ user: '', password: '' });
   const [busy, setBusy] = useState(false);
+  const [deploying, setDeploying] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Photo | null>(null);
   const [uploadProgress, setUploadProgress] = useState('');
   const [uploadResults, setUploadResults] = useState<Array<{ filename: string; success: boolean; message: string }>>([]);
@@ -73,6 +74,19 @@ export default function AdminPage() {
       setSession(fresh); setPhotos([]); setNotice('Signed out.');
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Sign out failed.'); }
     finally { setBusy(false); }
+  }
+
+  async function deployGallery() {
+    if (!session?.authenticated || deploying) return;
+    setDeploying(true); setError(''); setNotice('');
+    try {
+      await apiRequest<{ status: 'queued' }>('/deploy', {
+        method: 'POST', csrfToken: session.csrf_token,
+      });
+      setNotice('Public gallery deployment queued. It may take a few minutes to appear.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Could not request a gallery deployment.');
+    } finally { setDeploying(false); }
   }
 
   async function upload(event: FormEvent<HTMLFormElement>) {
@@ -143,8 +157,13 @@ export default function AdminPage() {
   return <main className="admin-shell">
     <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
     <section className="toolbar" aria-label="Photo management">
-      <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Manage your images and editorial presentation.</p></div>
-      <form className="upload-form" onSubmit={upload}><label className="file-picker">Choose images<input name="files" type="file" accept="image/*" multiple /></label><button className="primary" disabled={busy}>Upload selected</button></form>
+      <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Manage photos and deploy saved changes to publish them.</p></div>
+      <div className="toolbar-actions">
+        <button className="quiet" type="button" onClick={() => void deployGallery()} disabled={deploying}>
+          {deploying ? 'Requesting deployment…' : 'Deploy public gallery'}
+        </button>
+        <form className="upload-form" onSubmit={upload}><label className="file-picker">Choose images<input name="files" type="file" accept="image/*" multiple /></label><button className="primary" disabled={busy}>Upload selected</button></form>
+      </div>
     </section>
     {uploadProgress && <p className="message" role="status" aria-live="polite">{uploadProgress}</p>}
     {error && <p className="message error" role="alert">{error}</p>}
