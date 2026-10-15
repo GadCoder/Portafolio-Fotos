@@ -12,9 +12,11 @@ export default function AdminPage() {
   const [credentials, setCredentials] = useState({ user: '', password: '' });
   const [busy, setBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Photo | null>(null);
+  const [editTarget, setEditTarget] = useState<Photo | null>(null);
   const [uploadProgress, setUploadProgress] = useState('');
   const [uploadResults, setUploadResults] = useState<Array<{ filename: string; success: boolean; message: string }>>([]);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const editDialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const galleryHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -39,6 +41,21 @@ export default function AdminPage() {
     const dialog = dialogRef.current;
     if (deleteTarget && dialog && !dialog.open) dialog.showModal();
   }, [deleteTarget]);
+
+  useEffect(() => {
+    const dialog = editDialogRef.current;
+    if (editTarget && dialog && !dialog.open) dialog.showModal();
+  }, [editTarget]);
+
+  function closeEditDialog() {
+    editDialogRef.current?.close();
+    setEditTarget(null);
+    requestAnimationFrame(() => {
+      const opener = openerRef.current;
+      if (opener?.isConnected) opener.focus();
+      else galleryHeadingRef.current?.focus();
+    });
+  }
 
   function closeDeleteDialog(removed = false) {
     setDeleteTarget(null);
@@ -133,13 +150,6 @@ export default function AdminPage() {
     </main>
   );
 
-  const editRoute = /^\/photos\/(\d+)\/edit\/?$/.exec(window.location.pathname);
-  if (editRoute) {
-    const photo = photos.find((item) => item.id === Number(editRoute[1]));
-    if (!photo) return <main className="admin-shell"><section className="empty"><h1>Photo not found</h1><p>The requested photo may have been removed.</p><a className="quiet link-button" href="/">Back to photo library</a></section></main>;
-    return <PhotoEditPage key={photo.id} photo={photo} session={session} />;
-  }
-
   return <main className="admin-shell">
     <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
     <section className="toolbar" aria-label="Photo management">
@@ -153,7 +163,7 @@ export default function AdminPage() {
     {!photos.length ? <section className="empty"><h2>No photos yet</h2><p>Upload images to begin building your portfolio.</p></section> :
       <section className="gallery" aria-label="Photos">
         {photos.map((photo) => <article className="photo-card" key={photo.id}>
-          <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url, 640)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" /><div className="photo-actions"><a className="quiet link-button" href={`/photos/${photo.id}/edit`}>Edit</a><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>{photo.featured && <span className="badge">Featured</span>}</div>
+          <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url, 640)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" /><div className="photo-actions"><button className="quiet" onClick={(event) => { openerRef.current = event.currentTarget; setEditTarget(photo); }}>Edit</button><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>{photo.featured && <span className="badge">Featured</span>}</div>
           <div className="photo-content"><div className="photo-heading"><h2>{photo.title || photo.name}</h2><span>{photo.width ?? '—'} × {photo.height ?? '—'}</span></div>
             {(photo.location || photo.year || photo.seriesSlug) && <p className="meta">{[photo.location, photo.year, photo.seriesSlug].filter(Boolean).join(' · ')}</p>}
           </div>
@@ -161,6 +171,22 @@ export default function AdminPage() {
       </section>}
     <dialog ref={dialogRef} className="dialog" aria-labelledby="delete-heading" aria-describedby="delete-description" onCancel={(event) => { event.preventDefault(); dialogRef.current?.close(); closeDeleteDialog(); }} onClose={() => { if (deleteTarget && !busy) { setDeleteTarget(null); requestAnimationFrame(() => { const opener = openerRef.current; if (opener?.isConnected) opener.focus(); else galleryHeadingRef.current?.focus(); }); } }}>
       {deleteTarget && <><h2 id="delete-heading">Delete this photo?</h2><p id="delete-description">“{deleteTarget.name}” will be permanently removed from the portfolio.</p><div className="actions"><button className="danger" onClick={() => void removePhoto()} disabled={busy}>Delete photo</button><button className="quiet" onClick={() => { dialogRef.current?.close(); closeDeleteDialog(); }} disabled={busy}>Cancel</button></div></>}
+    </dialog>
+    <dialog ref={editDialogRef} className="edit-dialog" aria-labelledby="edit-heading" onCancel={(event) => { event.preventDefault(); closeEditDialog(); }} onClose={() => {
+      if (editTarget) {
+        setEditTarget(null);
+        requestAnimationFrame(() => {
+          const opener = openerRef.current;
+          if (opener?.isConnected) opener.focus();
+          else galleryHeadingRef.current?.focus();
+        });
+      }
+    }}>
+      {editTarget && <PhotoEditPage key={editTarget.id} photo={editTarget} session={session} onCancel={closeEditDialog} onSaved={(updated) => {
+        setPhotos((items) => items.map((item) => item.id === updated.id ? updated : item));
+        setNotice('Photo presentation updated.');
+        closeEditDialog();
+      }} />}
     </dialog>
   </main>;
 }
