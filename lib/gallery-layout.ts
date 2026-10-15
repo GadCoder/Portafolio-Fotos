@@ -15,7 +15,7 @@ export type PhotoPlacement = {
   height: number;
 };
 
-/** Justify regular rows and balance each desktop feature with nearby companion photos. */
+/** Justify regular rows and balance each feature with nearby companion photos. */
 export function packGallery(
   photos: readonly LayoutPhoto[],
   containerWidth: number,
@@ -41,7 +41,7 @@ export function packGallery(
   }
 
   while (remaining.length) {
-    const feature = columns >= 3
+    const feature = columns >= 2
       ? remaining.slice(0, columns).find((index) => photos[index].featured && ratio(index) >= 0.45 && photos[index].intrinsicWidth >= columnWidth * 1.5)
       : undefined;
 
@@ -49,7 +49,7 @@ export function packGallery(
       // Bounded lookahead keeps companions close to the feature in source order.
       const neighbours = remaining.slice(0, 12).filter((index) => index !== feature && !photos[index].featured && photos[index].intrinsicWidth >= columnWidth * 0.75);
       let best: { companions: number[]; featureWidth: number; sideWidth: number; height: number; score: number } | undefined;
-      for (let count = 1; count <= Math.min(4, neighbours.length); count++) {
+      for (let count = 1; count <= Math.min(2, neighbours.length); count++) {
         const companions = neighbours.slice(0, count);
         const sum = companions.reduce((total, index) => total + 1 / ratio(index), 0);
         const sideCaptions = companions.reduce((total, index) => total + caption(index), 0);
@@ -58,7 +58,8 @@ export function packGallery(
         const featureWidth = containerWidth - gap - sideWidth;
         if (featureWidth <= 0 || sideWidth <= 0 || featureWidth > photos[feature].intrinsicWidth || companions.some((index) => sideWidth > photos[index].intrinsicWidth)) continue;
         const height = featureWidth / ratio(feature) + caption(feature);
-        const score = Math.abs(featureWidth - (columnWidth * 2 + gap)) + (featureWidth < sideWidth * 1.15 ? containerWidth : 0);
+        // Keep the feature prominent without shrinking its companions into thumbnails.
+        const score = Math.abs(featureWidth - sideWidth * 1.4) + (featureWidth < sideWidth * 1.15 ? containerWidth : 0);
         if (!best || score < best.score) best = { companions, featureWidth, sideWidth, height, score };
       }
       if (best) {
@@ -75,15 +76,11 @@ export function packGallery(
       }
     }
 
-    if (columns === 2 && photos[remaining[0]].featured && ratio(remaining[0]) >= 1.2) {
-      const index = remaining.shift()!;
-      top += place(index, 0, top, containerWidth, 2) + gap;
-      continue;
-    }
-
-    // Regular rows contain up to the responsive column count, with proportional widths.
-    const row = remaining.splice(0, columns);
-    const availableWidth = row.length < columns ? columnWidth * row.length : containerWidth - gap * (row.length - 1);
+    // Two-photo rows give regular photos a similar scale to the feature's companions.
+    const rowColumns = Math.min(columns, 2);
+    const row = remaining.splice(0, rowColumns);
+    const regularWidth = (containerWidth - gap * (rowColumns - 1)) / rowColumns;
+    const availableWidth = row.length < rowColumns ? regularWidth * row.length : containerWidth - gap * (row.length - 1);
     const sum = row.reduce((total, index) => total + ratio(index), 0);
     const imageHeight = Math.min(availableWidth / sum, ...row.map((index) => photos[index].intrinsicWidth / ratio(index)));
     let left = 0;
