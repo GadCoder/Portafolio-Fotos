@@ -88,9 +88,15 @@ without rebuilding the frontend. If that refresh fails, the initial photos remai
 New uploads include their intrinsic dimensions. Existing photos reserve their
 legacy orientation ratio until the loaded image supplies its actual aspect ratio.
 
-Deploy the API with its `20261014_01` migration before deploying the frontend.
-The API container applies migrations on startup; other environments should run
-`uv run alembic upgrade head` in the API repository.
+Deploy the API with the admin API/session changes and required migrations in the backend PR before deploying the admin frontend. The API container applies migrations on startup; other environments should run `uv run alembic upgrade head` in the API repository.
+
+## Dokploy and private access
+
+Deploy the standalone admin using **Dokploy Compose configuration**, with `admin/` as the Compose project directory and `admin/compose.yaml` as its recipe. Set `ADMIN_API_ORIGIN` in the Compose environment to the API origin the admin should proxy to, and set the API's `PORTFOLIO_ORIGINS` to include the exact Tailscale Serve origin alongside the public portfolio origin. Set `ADMIN_HOST_PORT` if needed (default `39002`). The recipe binds only `127.0.0.1:${ADMIN_HOST_PORT}:8080` on the host; keep Caddy listening on container port `8080`.
+
+This is **not** a public-domain or Traefik-routed app. Do not attach a domain, enable public routing, or add public routing labels. Confirm Dokploy shows no public route for this Compose service. Configure Tailscale Serve separately to proxy to `http://127.0.0.1:${ADMIN_HOST_PORT}` (default `http://127.0.0.1:39002`). Use Serve only: do not configure Funnel or public DNS/domain access.
+
+The Compose healthcheck probes the admin's local `/healthz` endpoint.
 
 ## Image Optimizations
 

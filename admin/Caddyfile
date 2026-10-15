@@ -1,0 +1,17 @@
+:8080 {
+	@health path /healthz
+	handle @health {
+		respond "ok" 200
+	}
+
+	handle_path /admin-api/* {
+		rewrite * /admin/api{path}
+		reverse_proxy {$ADMIN_API_ORIGIN}
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

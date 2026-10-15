@@ -1,0 +1,16 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ADMIN_API_ORIGIN: ${ADMIN_API_ORIGIN:-https://portfolio-api.gadcoder.com}
+    ports:
+      - "127.0.0.1:${ADMIN_HOST_PORT:-39002}:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
