@@ -32,6 +32,11 @@ The API remains authoritative for validation. The browser talks only to same-ori
 - `POST /admin/api/photos/upload`: multipart repeated `files` parts, `X-CSRF-Token`; returns per-file results.
 - `PATCH /admin/api/photos/{id}/presentation`: JSON presentation fields, `X-CSRF-Token`; returns canonical updated photo.
 - `DELETE /admin/api/photos/{id}`: `X-CSRF-Token`.
+- `POST /admin/api/deploy`: `X-CSRF-Token`; queues a Cloudflare Pages deployment.
+  The deploy hook URL is configured only on the backend API service as
+  `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL`—never in the Vite environment or browser
+  bundle. A 202 response means Cloudflare accepted the trigger, not that its
+  build has finished.
 
 ## Build and private deployment
 

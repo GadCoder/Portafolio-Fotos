@@ -6,13 +6,17 @@ import AdminPage from '../app/page';
 const session = { authenticated: true, user: 'admin', csrf_token: 'token' };
 const photo = { id: 7, is_horizontal: true, photo_url: 'https://images.test/rain.jpg', name: 'rain.jpg', width: 1200, height: 800, featured: false, featuredLayout: null, title: null, location: null, year: null, seriesSlug: null, created_at: '2026-01-01' };
 
-function mockApi(uploadResults: unknown = { results: [] }) {
+function mockApi(
+  uploadResults: unknown = { results: [] },
+  deployResponse: Response = Response.json({ status: 'queued' }, { status: 202 }),
+) {
   const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url.endsWith('/session')) return Response.json(session);
     if (url.endsWith('/photos') && (!init?.method || init.method === 'GET')) return Response.json([photo]);
     if (url.endsWith('/presentation')) return Response.json({ ...photo, ...JSON.parse(String(init?.body)) });
     if (url.endsWith('/upload')) return Response.json(uploadResults);
+    if (url.endsWith('/deploy')) return deployResponse;
     if (init?.method === 'DELETE') return new Response(null, { status: 204 });
     return Response.json([]);
   });
@@ -35,20 +39,25 @@ describe('admin gallery', () => {
     expect(input.files).toHaveLength(1);
   });
 
-  it('restores session, renders photos, and saves edited presentation fields', async () => {
+  it('restores session and sends edits from the dedicated presentation editor', async () => {
     const fetch = mockApi();
     const user = userEvent.setup();
-    render(<AdminPage />);
-    expect(await screen.findByRole('heading', { name: 'rain.jpg' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /edit/i }));
-    const title = screen.getByLabelText('Title');
-    await user.clear(title);
-    await user.type(title, 'After rain');
-    await user.click(screen.getByRole('button', { name: 'Save changes' }));
-    await waitFor(() => expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/presentation'))).toBe(true));
-    const request = fetch.mock.calls.find(([url]) => String(url).endsWith('/presentation'))?.[1];
-    expect(request?.headers).toMatchObject({ 'X-CSRF-Token': 'token' });
-    expect(JSON.parse(String(request?.body))).toMatchObject({ title: 'After rain' });
+    const originalPath = window.location.pathname;
+    window.history.replaceState({}, '', '/photos/7/edit');
+    try {
+      render(<AdminPage />);
+      expect(await screen.findByLabelText('Title')).toHaveValue('');
+      fetch.mockResolvedValueOnce(Response.json({ detail: 'Save failed' }, { status: 500 }));
+      const title = screen.getByLabelText('Title');
+      await user.type(title, 'After rain');
+      await user.click(screen.getByRole('button', { name: 'Save changes' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent('Save failed');
+      const request = fetch.mock.calls.find(([url]) => String(url).endsWith('/presentation'))?.[1];
+      expect(request?.headers).toMatchObject({ 'X-CSRF-Token': 'token' });
+      expect(JSON.parse(String(request?.body))).toMatchObject({ title: 'After rain' });
+    } finally {
+      window.history.replaceState({}, '', originalPath);
+    }
   });
 
   it('uploads multiple files and shows every per-file API result', async () => {
@@ -75,6 +84,30 @@ describe('admin gallery', () => {
     const request = fetch.mock.calls.find(([url]) => String(url).endsWith('/upload'))?.[1];
     expect(request?.headers).toMatchObject({ 'X-CSRF-Token': 'token' });
     expect((request?.body as FormData).getAll('files')).toHaveLength(2);
+  });
+
+  it('requests a public gallery deployment and reports that it was queued', async () => {
+    const fetch = mockApi();
+    const user = userEvent.setup();
+    render(<AdminPage />);
+    await screen.findByRole('heading', { name: 'rain.jpg' });
+    await user.click(screen.getByRole('button', { name: 'Deploy public gallery' }));
+
+    expect(await screen.findByText(/deployment queued/i)).toBeInTheDocument();
+    const request = fetch.mock.calls.find(([url]) => String(url).endsWith('/deploy'))?.[1];
+    expect(request?.method).toBe('POST');
+    expect(request?.headers).toMatchObject({ 'X-CSRF-Token': 'token' });
+  });
+
+  it('reports deployment configuration errors without claiming success', async () => {
+    mockApi(undefined, Response.json({ detail: 'Cloudflare Pages deploy hook is not configured' }, { status: 503 }));
+    const user = userEvent.setup();
+    render(<AdminPage />);
+    await screen.findByRole('heading', { name: 'rain.jpg' });
+    await user.click(screen.getByRole('button', { name: 'Deploy public gallery' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/deploy hook is not configured/i);
+    expect(screen.queryByText(/deployment queued/i)).not.toBeInTheDocument();
   });
 
   it('requires confirmation before deleting a photo', async () => {

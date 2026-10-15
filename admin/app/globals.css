@@ -7,13 +7,14 @@ button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: .58; }
 :focus-visible { outline: 3px solid #6c96c1; outline-offset: 2px; }
 .admin-shell { width: min(1440px, 100% - 48px); margin: 0 auto; padding: 42px 0 72px; }
-.topbar, .toolbar, .account, .photo-heading, .actions, .upload-form { display: flex; align-items: center; }
+.topbar, .toolbar, .account, .photo-heading, .actions, .upload-form, .toolbar-actions { display: flex; align-items: center; }
 .topbar, .toolbar { justify-content: space-between; gap: 24px; }
 .topbar { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
 h1, h2, p { margin-top: 0; }
 h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.045em; }
 .eyebrow { margin-bottom: 8px; color: var(--blue); font-size: .72rem; font-weight: 700; letter-spacing: .12em; }
 .account { gap: 18px; color: var(--muted); }
+.toolbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
 .toolbar { padding: 30px 0 24px; }
 .toolbar h2 { margin: 0 0 5px; font-size: 1.25rem; }
 .muted, .meta { color: var(--muted); }
@@ -83,6 +84,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 @media (max-width: 700px) {
   .admin-shell { width: min(100% - 28px, 560px); padding-top: 24px; }
   .topbar, .toolbar { align-items: flex-start; flex-direction: column; }
+  .toolbar-actions { width: 100%; align-items: stretch; flex-direction: column; }
   .topbar { gap: 15px; }
   .account { width: 100%; justify-content: space-between; }
   .toolbar { gap: 16px; }
