@@ -1,6 +1,6 @@
 # Private photography admin
 
-An independently configured Next.js server app for managing portfolio photos. It is intentionally separate from the public static-export app at the repository root.
+A standalone **Vite + React** app for managing portfolio photos. It is separate from the public portfolio app at the repository root and has no server-side rendering requirement.
 
 ## Local development
 
@@ -12,36 +12,29 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`. The `ADMIN_API_ORIGIN` rewrite target is read by Next.js during build, so set it for `npm run build` (and the Docker build argument) when targeting a non-default API. At runtime, the generated server uses that same-origin rewrite.
+Open `http://localhost:5173`. Vite proxies same-origin `/admin-api/*` requests to `${ADMIN_API_ORIGIN}/admin/api/*`; the default API origin is `https://portfolio-api.gadcoder.com`. Override it when needed:
 
 ```sh
 ADMIN_API_ORIGIN=https://portfolio-api.gadcoder.com npm run dev
-npm run lint
+npm run typecheck
 npm test
 npm run build
-npm start
 ```
-
-For Docker, configure the API origin at build time:
-
-```sh
-docker build --build-arg ADMIN_API_ORIGIN=https://portfolio-api.gadcoder.com -t portfolio-photos-admin .
-```
-
-The Next server rewrites same-origin `/admin-api/:path*` requests to `${ADMIN_API_ORIGIN}/admin/api/:path*`. Browser requests use same-origin credentials; session cookies are API-issued, host-only, Secure, HttpOnly and SameSite=Lax. The UI retains only the API-provided CSRF token in in-memory React state. It does not persist credentials or tokens in storage or URLs.
 
 ## API contract
+
+The API remains authoritative for validation. The browser talks only to same-origin `/admin-api/*`; the development Vite proxy and production Caddy server both map that path to the API's `/admin/api/*` routes. Session cookies stay host-only, HttpOnly, Secure and SameSite=Lax; the UI keeps only the API-provided CSRF token in in-memory React state. Before private deployment, include the admin's exact Tailscale Serve origin in the API service's `PORTFOLIO_ORIGINS` setting because API write requests validate `Origin` as well as CSRF. For local development against a remote API, configure the dev origin in that environment's allowlist.
 
 - `GET /admin/api/session`: unauthenticated `{ authenticated: false, csrf_token }` or authenticated `{ authenticated: true, user, csrf_token }`.
 - `POST /admin/api/login`: JSON `{ user, password }`, `X-CSRF-Token`; returns authenticated session and sets the session cookie.
 - `POST /admin/api/logout`: `X-CSRF-Token`; returns 204.
-- `GET /admin/api/photos`: array with `id`, `is_horizontal`, `photo_url`, `name`, `width`, `height`, `featured`, `featuredLayout`, `title`, `location`, `year`, `seriesSlug`, `created_at`.
-- `POST /admin/api/photos/upload`: multipart repeated `files` parts, `X-CSRF-Token`; returns per-file results. The UI refreshes the gallery after completion.
-- `PATCH /admin/api/photos/{id}/presentation`: JSON `{ featured, featuredLayout, title, location, year, seriesSlug }`, `X-CSRF-Token`; returns canonical updated photo.
+- `GET /admin/api/photos`: photo array with presentation metadata.
+- `POST /admin/api/photos/upload`: multipart repeated `files` parts, `X-CSRF-Token`; returns per-file results.
+- `PATCH /admin/api/photos/{id}/presentation`: JSON presentation fields, `X-CSRF-Token`; returns canonical updated photo.
 - `DELETE /admin/api/photos/{id}`: `X-CSRF-Token`.
-
-The API remains authoritative for validation. Error bodies' `detail` or `message` are presented when available. The client does not assume success for non-2xx responses.
 
 ## Build and private deployment
 
-`npm run build` creates a standalone Node server build. The included Dockerfile runs that server and exposes `/api/health` for platform health checks. Do not deploy this admin app to Cloudflare Pages/static export. Dokploy deployment must bind the app to a **private loopback interface** and expose it only through **Tailscale Serve**; do not attach a public domain. Network binding and Tailscale configuration remain deployment-time settings, not code defaults.
+`npm run build` creates a static Vite bundle served by Caddy. Caddy serves the SPA, proxies `/admin-api/*` to the configured API origin, and exposes `/healthz` for platform checks. `ADMIN_API_ORIGIN` is a runtime environment setting in Docker Compose.
+
+Dokploy deployment must bind the app to the **loopback interface** and expose it only through **Tailscale Serve**; do not attach a public domain or use Funnel. Compose maps `127.0.0.1:39002` to the container. Deployment and Tailscale routing remain separate from this repository change.
