@@ -49,46 +49,58 @@ interface Photo {
 }
 ```
 
-**Error handling:** If the API fails, the app renders `ErrorComponent` instead of crashing.
+**Error handling:** API or image metadata failures stop the build so the previous deployment stays live.
 
 ## Editorial gallery
 
-In the API admin, open **Editar** on a photo, select **Destacar fotografía**,
-optionally enter caption metadata, and save. Uncheck the featured option to
-restore regular presentation. Selections remain in the API database;
-`seriesSlug` remains metadata only.
+The final gallery layout is included in the static HTML and CSS. Regular photos
+share justified rows of two. Featured photos are paired with up to two following
+regular photos; CSS derives the column widths from their aspect ratios so the
+feature and its companions align at the bottom. Narrow features and consecutive
+features use individual rows. Mobile shows a natural single column in source
+order. Photos retain their DOM, keyboard and lightbox order and are never cropped.
+Known intrinsic dimensions cap row widths to avoid upscaling.
 
-`lib/gallery-layout.ts` contains the pure `packGallery` function. Regular rows
-justify three photos on desktop and two on tablet using a shared image height
-and widths derived from aspect ratios. Mobile uses a natural single-column flow.
-Images are never cropped or distorted.
+`lib/gallery-layout.ts` groups consecutive photos deterministically at build time.
+There are no browser measurements, absolute placements, image-load ratio updates,
+or background photo refreshes. Both `featuredLayout` values retain the integrated
+presentation. Captions reserve two lines and truncate longer visible text, with
+the complete caption available to assistive technology and in its title tooltip.
+Satoshi is preloaded with an adjusted Arial fallback and optional font display,
+so a late font download does not change the layout during a visit.
 
-Desktop features receive a larger allocation, paired with a stack of one to four
-nearby regular photographs. Their widths are calculated so the feature and the
-stack reach the same bottom edge, including caption height and gaps. This gives
-portrait features visible prominence without an empty neighbouring column.
-Companions come from at most the next twelve pending photographs. The algorithm
-prefers a feature width near two normal columns, subject to source size limits.
-On tablet, featured landscapes can occupy the full row; portraits remain in a
-regular row. On mobile, all photos use the available width. Extremely narrow
-portraits and small sources retain a smaller allocation to avoid excessive height
-or upscaling. Known source dimensions cap every image; legacy sources without
-dimensions use a conservative 1200px cap until their actual ratio is loaded.
+`lib/photo-metadata.ts` resolves missing dimensions from original image headers
+during builds, including EXIF orientation. It uses four concurrent readers, a
+30-second timeout per image, a 50 MB limit, and a cache in
+`.next/cache/photo-dimensions.json`. Images use their final ratios before download.
+A metadata or API failure fails the build, keeping the previous deployment live.
+An empty API array is a valid empty gallery.
 
-Photos retain their original DOM, focus, and lightbox order. The visual layout
-can bring a nearby feature forward and move its companion photos alongside it;
-this bounded change in visual sequence keeps the gallery compact. Final partial
-rows retain a smaller footprint. `featuredLayout` metadata is preserved, and both
-values use the integrated presentation rather than isolated sections. No manual
-placement or additional layout dependency is required.
+### Publishing admin changes
 
-The static export includes photos at build time and refreshes them from the API
-when the gallery mounts. Saved admin changes appear on the next visit or reload,
-without rebuilding the frontend. If that refresh fails, the initial photos remain.
-New uploads include their intrinsic dimensions. Existing photos reserve their
-legacy orientation ratio until the loaded image supplies its actual aspect ratio.
+The site reads current photos during each build. Uploads, presentation edits and
+deletions appear after a successful Cloudflare Pages deployment. Configure the
+API's `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL` using a production Pages deploy hook;
+see [Cloudflare's deploy hook guide](https://developers.cloudflare.com/pages/configuration/deploy-hooks/).
+The URL is a secret and belongs only in the backend environment.
 
-Deploy the API with the admin API/session changes and required migrations in the backend PR before deploying the admin frontend. The API container applies migrations on startup; other environments should run `uv run alembic upgrade head` in the API repository.
+Deploy the API repository’s publishing support, including migration
+`20261015_02` and the publication worker, configure the hook in Dokploy, then
+deploy the frontend. The worker debounces changes for 15 seconds and retries failed
+hook requests; pending changes survive API restarts. Pages build completion is
+visible in Cloudflare's deployment dashboard. The admin deploy button can
+request a build immediately and acknowledges the edits included in that request.
+
+Inside the API container, backfill stored dimensions with:
+
+```sh
+uv run python -m scripts.backfill_photo_dimensions
+uv run python -m scripts.backfill_photo_dimensions --apply
+```
+
+The first command previews the changes; the second saves them and queues a build.
+New uploads already store their dimensions. The frontend's build lookup also
+supports legacy records while the database backfill is pending.
 
 ## Dokploy and private access
 
@@ -105,7 +117,7 @@ The Compose healthcheck probes the admin's local `/healthz` endpoint.
 - **Lazy loading**: Offscreen images are deferred
 - **Responsive**: `srcset` for multiple viewport sizes
 - **Loading priority**: The first photograph loads eagerly; remaining photos load lazily
-- **Preserved aspect ratio**: Uses intrinsic dimensions when supplied; legacy records are corrected on load
+- **Preserved aspect ratio**: Intrinsic dimensions are included at build time for all images
 
 ## Available Scripts
 
@@ -118,6 +130,26 @@ npm run lint     # ESLint
 ## Deployment
 
 The project uses `output: 'export'` to generate static files in `out/`.
+
+In the Cloudflare Pages project's **Settings → Build configuration**, use:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | Next.js (Static HTML Export) |
+| Build command | `npm run build` |
+| Build output directory | `out` |
+| Root directory | Repository root (leave blank) |
+
+Set `NODE_VERSION=24` in the Pages build environment to match the Node.js
+requirement below. Apply the settings to production and preview builds.
+
+Replace any existing `npx @cloudflare/next-on-pages@1` build command and
+`.vercel/output/static` output directory. This static site does not need that
+adapter, Wrangler, or Pages Functions. Installing the adapter through `npx` can
+fail on conflicting Wrangler and Workers types peer dependencies before the
+app even builds. After saving the settings, retry the failed deployment.
+
+See [Cloudflare's static Next.js deployment guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/).
 
 ```bash
 npm run build

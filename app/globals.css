@@ -114,29 +114,41 @@ body {
 
 .editorial-gallery {
   --photo-gap: 24px;
-  --gallery-columns: 3;
-  display: grid;
-  grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
-  column-gap: var(--photo-gap);
-  row-gap: var(--photo-gap);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--photo-gap);
   padding-bottom: 48px;
 }
 
-.editorial-gallery[data-measured="true"] {
-  display: block;
-  position: relative;
-}
-
-.editorial-gallery[data-measured="true"] .editorial-item {
-  position: absolute;
+.gallery-regular-row {
+  display: flex;
+  align-items: start;
+  gap: var(--photo-gap);
+  width: 100%;
 }
 
 .editorial-item {
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.gallery-feature-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, calc(var(--side-share) + var(--side-offset)));
+  align-items: start;
+  gap: var(--photo-gap);
+  width: 100%;
+}
+
+.gallery-companions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--photo-gap);
   min-width: 0;
 }
 
 .editorial-content {
+  min-width: 0;
   margin: 0;
 }
 
@@ -169,7 +181,16 @@ body {
   color: var(--muted);
   font-size: 13px;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 19.5px;
+  height: 39px;
+}
+
+.featured-caption-text {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow-wrap: anywhere;
 }
 
@@ -212,10 +233,6 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .editorial-gallery {
-    --gallery-columns: 2;
-  }
-
   .page-shell {
     width: min(100% - 64px, 1440px);
   }
@@ -229,25 +246,24 @@ body {
 @media (max-width: 767px) {
   .editorial-gallery {
     --photo-gap: 16px;
-    --gallery-columns: 1;
     padding-bottom: 32px;
   }
 
-  .editorial-gallery,
-  .editorial-gallery[data-measured="true"] {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--photo-gap);
+  .gallery-regular-row,
+  .gallery-feature-row,
+  .gallery-companions {
+    display: contents;
   }
 
-  .editorial-gallery[data-measured="true"] .editorial-item {
-    position: static;
+  .editorial-item {
+    flex: none;
   }
 
   .featured-caption {
     font-size: 12px;
     margin-top: 10px;
+    line-height: 18px;
+    height: 36px;
   }
   .page-shell {
     width: calc(100% - 40px);

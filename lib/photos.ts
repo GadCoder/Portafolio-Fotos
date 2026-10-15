@@ -16,10 +16,18 @@ export type GalleryPhoto = PhotoPresentation & {
   height?: number | null;
 };
 
+export function hasImageDimensions(photo: Pick<GalleryPhoto, "width" | "height">) {
+  return typeof photo.width === "number" && Number.isFinite(photo.width) && photo.width > 0
+    && typeof photo.height === "number" && Number.isFinite(photo.height) && photo.height > 0;
+}
+
 export function imageDimensions(photo: GalleryPhoto) {
+  if (hasImageDimensions(photo)) {
+    return { width: photo.width!, height: photo.height! };
+  }
   return {
-    width: photo.width && photo.width > 0 ? photo.width : photo.is_horizontal ? 1200 : 800,
-    height: photo.height && photo.height > 0 ? photo.height : photo.is_horizontal ? 800 : 1200,
+    width: photo.is_horizontal ? 1200 : 800,
+    height: photo.is_horizontal ? 800 : 1200,
   };
 }
 
