@@ -37,7 +37,7 @@ export default function Photo({ src, alt, width, height, intrinsicWidth, index, 
           srcSet={srcSet}
           sizes={sizes}
           alt={alt}
-          loading={priority ? "eager" : "lazy"}
+          loading={priority || index < 3 ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
           className="gallery-photo-image"

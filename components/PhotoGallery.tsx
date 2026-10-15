@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Photo from "@/components/Photo";
+import GalleryImageLoader from "@/components/GalleryImageLoader";
 import { GalleryLightboxProvider } from "@/components/GalleryLightbox";
 import { imageDimensions, type GalleryPhoto } from "@/lib/photos";
 import { galleryRows } from "@/lib/gallery-layout";
@@ -39,7 +40,7 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
   return (
     <GalleryLightboxProvider photos={photos}>
       {!photos.length && <p className="gallery-empty">Todavía no hay fotografías.</p>}
-      <div className="editorial-gallery">
+      <GalleryImageLoader>
         {galleryRows(photos).map((row) => {
           const dimensions = row.indices.map((index) => imageDimensions(photos[index]));
           const ratios = dimensions.map(({ width, height }) => width / height);
@@ -84,7 +85,7 @@ export default function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
             </div>
           );
         })}
-      </div>
+      </GalleryImageLoader>
     </GalleryLightboxProvider>
   );
 }

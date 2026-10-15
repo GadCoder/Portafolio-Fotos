@@ -114,9 +114,14 @@ The Compose healthcheck probes the admin's local `/healthz` endpoint.
 
 - **CDN**: Cloudflare Images with on-the-fly transformations
 - **Formats**: Auto-conversion to WebP/AVIF
-- **Lazy loading**: Offscreen images are deferred
+- **Scroll loading**: The first three images load eagerly. A shared observer starts
+  nearby image requests roughly three viewport heights ahead (2,000–4,000px),
+  updating the range on resize. Distant images remain lazy. Data-saving mode,
+  disabled JavaScript, and browsers without IntersectionObserver retain native
+  lazy loading. Image quality, responsive rendition selection, and lightbox
+  resolution are preserved.
 - **Responsive**: `srcset` for multiple viewport sizes
-- **Loading priority**: The first photograph loads eagerly; remaining photos load lazily
+- **Loading priority**: Only the first photograph receives high fetch priority
 - **Preserved aspect ratio**: Intrinsic dimensions are included at build time for all images
 
 ## Available Scripts
