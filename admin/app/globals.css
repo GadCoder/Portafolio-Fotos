@@ -31,6 +31,9 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .photo-card { align-self: start; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: white; }
 .image-wrap { position: relative; display: grid; height: 240px; place-items: center; background: #e8eef5; }
 .image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+.photo-actions { position: absolute; top: 12px; right: 12px; z-index: 1; display: flex; gap: 6px; }
+.photo-actions .quiet, .photo-actions .danger { min-height: 36px; padding: 0 11px; background: #fff; box-shadow: 0 2px 8px #1d293822; }
+.photo-actions .danger { border-color: #eacccc; }
 .badge { position: absolute; top: 12px; left: 12px; padding: 6px 9px; border-radius: 20px; background: var(--blue); color: white; font-size: .74rem; font-weight: 700; }
 .photo-content { padding: 16px; }
 .photo-heading { justify-content: space-between; gap: 12px; }
