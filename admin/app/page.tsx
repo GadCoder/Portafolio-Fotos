@@ -174,7 +174,7 @@ export default function AdminPage() {
   return <main className="admin-shell">
     <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
     <section className="toolbar" aria-label="Photo management">
-      <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Manage photos and deploy saved changes to publish them.</p></div>
+      <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Saved changes publish automatically. Deploy now to publish sooner.</p></div>
       <div className="toolbar-actions">
         <button className="quiet" type="button" onClick={() => void deployGallery()} disabled={deploying}>
           {deploying ? 'Requesting deployment…' : 'Deploy public gallery'}

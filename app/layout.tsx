@@ -6,7 +6,10 @@ const satoshi = localFont({
     { path: "../public/fonts/satoshi-regular.woff2", weight: "400" },
     { path: "../public/fonts/satoshi-bold.woff2", weight: "700" },
   ],
-  display: "swap",
+  display: "optional",
+  preload: true,
+  adjustFontFallback: "Arial",
+  fallback: ["Arial", "sans-serif"],
 });
 
 export const metadata = {

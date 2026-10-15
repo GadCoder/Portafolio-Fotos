@@ -36,7 +36,9 @@ The API remains authoritative for validation. The browser talks only to same-ori
   The deploy hook URL is configured only on the backend API service as
   `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL`—never in the Vite environment or browser
   bundle. A 202 response means Cloudflare accepted the trigger, not that its
-  build has finished.
+  build has finished. Saved photo changes also queue automatic builds; a
+  successful manual deployment acknowledges pending edits to avoid a redundant
+  automatic request.
 
 ## Build and private deployment
 
