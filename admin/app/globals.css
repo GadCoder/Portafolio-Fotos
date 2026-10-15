@@ -25,6 +25,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .primary, .quiet, .danger { min-height: 40px; padding: 0 15px; border: 1px solid transparent; border-radius: 5px; font-weight: 650; }
 .primary { background: var(--blue); color: white; }
 .quiet { border-color: var(--line); background: white; color: var(--ink); }
+.link-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .danger { border-color: #eacccc; background: #fff8f7; color: var(--red); }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 20px; }
 .photo-card { align-self: start; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: white; }
@@ -39,6 +40,13 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .actions { gap: 8px; margin-top: 15px; }
 .edit-form, .login-panel { display: grid; gap: 13px; }
 .edit-form { margin-top: 18px; }
+.editor-page { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap: 32px; align-items: start; padding-top: 30px; }
+.editor-preview { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #e8eef5; }
+.editor-preview img { display: block; width: 100%; max-height: 72vh; object-fit: contain; }
+.editor-preview p { margin: 0; padding: 12px 15px; background: white; color: var(--muted); font-size: .85rem; overflow-wrap: anywhere; }
+.editor-form { margin: 0; padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+.editor-form h2 { margin: 0 0 5px; font-size: 1.2rem; }
+.editor-form .muted { margin-bottom: 3px; }
 .edit-form label, .login-panel label { display: grid; gap: 6px; font-size: .84rem; font-weight: 650; }
 .edit-form input:not([type=checkbox]), .edit-form select, .login-panel input { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); }
 .check-row { display: flex !important; align-items: center; gap: 8px !important; }
@@ -65,6 +73,9 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
   .topbar { gap: 15px; }
   .account { width: 100%; justify-content: space-between; }
   .toolbar { gap: 16px; }
+  .editor-page { grid-template-columns: 1fr; gap: 20px; padding-top: 22px; }
+  .editor-preview img { max-height: 52vh; }
+  .editor-form { padding: 18px; }
   .upload-form { width: 100%; align-items: stretch; flex-direction: column; }
   .file-picker { justify-content: space-between; gap: 8px; }
   .file-picker input { width: 60%; }
