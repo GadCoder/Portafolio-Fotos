@@ -1,28 +1,11 @@
-export interface Session {
-  authenticated: false;
-  csrf_token: string;
-}
-export interface AuthenticatedSession {
-  authenticated: true;
-  user: string;
-  csrf_token: string;
-}
-export type SessionResponse = Session | AuthenticatedSession;
-export interface Photo {
-  id: number; is_horizontal: boolean; photo_url: string; name: string;
-  width: number | null; height: number | null; featured: boolean;
-  featuredLayout: 'wide' | 'contained' | null; title: string | null;
-  location: string | null; seriesSlug: string | null; created_at: string;
-  seriesId?: number | null; seriesPosition?: number | null; showInPreview?: boolean; previewPosition?: number | null;
-}
-export interface Series {
-  id: number; slug: string; title: string; description: string | null; year?: number | null; position: number;
-  published: boolean; totalPhotos: number; previewPhotos: Photo[]; photos: Photo[];
-}
-export interface Presentation {
-  featured: boolean; featuredLayout: 'wide' | 'contained' | null;
-  title: string | null; location: string | null; seriesSlug: string | null;
-}
+import type { AdminSeriesDto, PhotoDto, PhotoPresentation, SessionDto } from '@portfolio-photos/contracts';
+
+export type Session = Extract<SessionDto, { authenticated: false }>;
+export type AuthenticatedSession = Extract<SessionDto, { authenticated: true }>;
+export type SessionResponse = SessionDto;
+export type Photo = PhotoDto;
+export type Series = AdminSeriesDto;
+export type Presentation = Pick<PhotoPresentation, 'featured' | 'featuredLayout' | 'title' | 'location' | 'seriesSlug'>;
 type RequestOptions = {
   method?: string; csrfToken?: string; body?: unknown; files?: File[];
   fetcher?: typeof fetch;

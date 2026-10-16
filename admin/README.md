@@ -4,21 +4,20 @@ A standalone **Vite + React** app for managing portfolio photos. It is separate 
 
 ## Local development
 
-Requirements: Node.js 24 and npm.
+Requirements: Node.js 24 and pnpm 10 (run installation from the monorepo root).
 
 ```sh
-cd admin
-npm ci
-npm run dev
+pnpm install
+pnpm dev:admin
 ```
 
 Open `http://localhost:5173`. Vite proxies same-origin `/admin-api/*` requests to `${ADMIN_API_ORIGIN}/admin/api/*`; the default API origin is `https://portfolio-api.gadcoder.com`. Override it when needed:
 
 ```sh
-ADMIN_API_ORIGIN=https://portfolio-api.gadcoder.com npm run dev
-npm run typecheck
-npm test
-npm run build
+ADMIN_API_ORIGIN=https://portfolio-api.gadcoder.com pnpm dev:admin
+pnpm --filter portfolio-photos-admin typecheck
+pnpm --filter portfolio-photos-admin test
+pnpm build:admin
 ```
 
 ## API contract
@@ -42,6 +41,6 @@ The API remains authoritative for validation. The browser talks only to same-ori
 
 ## Build and private deployment
 
-`npm run build` creates a static Vite bundle served by Caddy. Caddy serves the SPA, proxies `/admin-api/*` to the configured API origin, and exposes `/healthz` for platform checks. `ADMIN_API_ORIGIN` is a runtime environment setting in Docker Compose.
+`pnpm build:admin` creates a static Vite bundle served by Caddy. Caddy serves the SPA, proxies `/admin-api/*` to the configured API origin, and exposes `/healthz` for platform checks. `ADMIN_API_ORIGIN` is a runtime environment setting in Docker Compose.
 
 Dokploy deployment must bind the app to the **loopback interface** and expose it only through **Tailscale Serve**; do not attach a public domain or use Funnel. Compose maps `127.0.0.1:39002` to the container. Deployment and Tailscale routing remain separate from this repository change.

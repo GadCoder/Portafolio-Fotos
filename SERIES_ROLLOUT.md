@@ -46,7 +46,7 @@ only through a separately approved recovery operation.
 
 ## Local verification
 
-Run `uv run pytest` in the backend, `npm test` and `npm run build` in `admin/`,
+Run `uv run pytest` in the backend, `pnpm --filter portfolio-photos-admin test` and `pnpm build:admin`,
 and the frontend's tests, lint, and production build at the repository root.
 The new backend must be available for a normal frontend build. A fixture build
 verifies static generation without changing production records; it does not

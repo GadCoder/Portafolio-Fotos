@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "npm run typecheck && vite build",
+    "dev": "pnpm --filter @portfolio-photos/contracts build && vite --host 0.0.0.0",
+    "build": "pnpm --filter @portfolio-photos/contracts build && pnpm run typecheck && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "pnpm --filter @portfolio-photos/contracts build && tsc --noEmit",
+    "test": "pnpm --filter @portfolio-photos/contracts build && vitest run"
   },
   "dependencies": {
+    "@portfolio-photos/contracts": "workspace:*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
