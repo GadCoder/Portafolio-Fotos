@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { apiRequest, type Photo, type Presentation, type SessionResponse } from '../lib/api';
+import { useEffect, useState, type FormEvent } from 'react';
+import { apiRequest, type Photo, type Presentation, type Series, type SessionResponse } from '../lib/api';
 import { adminPhotoUrl } from '../lib/photos';
 
 type EditState = Presentation;
@@ -16,8 +16,20 @@ export default function PhotoEditPage({ photo, session, onCancel, onSaved }: {
   onSaved: (photo: Photo) => void;
 }) {
   const [draft, setDraft] = useState<EditState>(() => emptyPresentation(photo));
+  const [series, setSeries] = useState<Series[]>([]);
+  const [seriesError, setSeriesError] = useState('');
+  const [loadingSeries, setLoadingSeries] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    apiRequest<Series[]>('/series')
+      .then((items) => { if (active) setSeries(items); })
+      .catch((reason: unknown) => { if (active) setSeriesError(reason instanceof Error ? reason.message : 'Could not load available series.'); })
+      .finally(() => { if (active) setLoadingSeries(false); });
+    return () => { active = false; };
+  }, []);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,7 +61,9 @@ export default function PhotoEditPage({ photo, session, onCancel, onSaved }: {
         {draft.featured && <label>Featured layout<select value={draft.featuredLayout ?? 'wide'} onChange={(event) => setDraft({ ...draft, featuredLayout: event.target.value as Presentation['featuredLayout'] })}><option value="wide">Wide</option><option value="contained">Contained</option></select></label>}
         <label>Title<input value={draft.title ?? ''} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
         <label>Location<input value={draft.location ?? ''} onChange={(event) => setDraft({ ...draft, location: event.target.value })} /></label>
-        <label>Series slug<input value={draft.seriesSlug ?? ''} onChange={(event) => setDraft({ ...draft, seriesSlug: event.target.value })} /></label>
+        <label>Series<select value={draft.seriesSlug ?? ''} disabled={loadingSeries || Boolean(seriesError)} onChange={(event) => setDraft({ ...draft, seriesSlug: event.target.value || null })}><option value="">No series</option>{series.map((item) => <option key={item.id} value={item.slug}>{item.title}{item.published ? ' · Published' : ' · Draft'}</option>)}</select></label>
+        {loadingSeries && <p className="muted" role="status">Loading available series…</p>}
+        {seriesError && <p className="message error" role="alert">Could not load series: {seriesError}</p>}
         <div className="actions"><button className="primary" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button><button className="quiet" type="button" onClick={onCancel} disabled={busy}>Cancel</button></div>
       </form>
     </section>;
