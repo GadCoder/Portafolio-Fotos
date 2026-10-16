@@ -31,7 +31,7 @@ describe('series management', () => {
     expect(screen.getByLabelText('Title')).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(dialog).not.toBeVisible());
-    expect(opener).toHaveFocus();
+    await waitFor(() => expect(opener).toHaveFocus());
     expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series') && init?.method === 'POST')).toBe(false);
 
     await user.click(opener);
@@ -41,7 +41,7 @@ describe('series management', () => {
     await user.click(screen.getByRole('button', { name: 'Create draft' }));
     expect(await screen.findByRole('heading', { name: 'Edit Night walks' })).toBeInTheDocument();
     const createRequest = fetcher.mock.calls.find(([url, init]) => String(url).endsWith('/series') && init?.method === 'POST')?.[1];
-    expect(JSON.parse(String(createRequest?.body))).toEqual({ title: 'Night walks', slug: 'night-walks', description: 'A collection after dark.', published: false });
+    expect(JSON.parse(String(createRequest?.body))).toEqual({ title: 'Night walks', slug: 'night-walks', description: 'A collection after dark.', year: null, published: false });
     expect(fetcher.mock.calls.some(([url, init]) => /\/series\/22\/(photos|preview)$/.test(String(url)) && init?.method === 'PUT')).toBe(false);
 
     await user.click(screen.getByRole('button', { name: '← Back to series' }));
@@ -67,11 +67,54 @@ describe('series management', () => {
     expect(JSON.parse(String(request?.body))).toEqual({ seriesIds: [2, 1] });
   });
 
-  it('requires explicit confirmation before assigning unassigned photos to Street Photography', async () => {
+  it('adds multiple unassigned photos from a preview dialog and persists them with the series', async () => {
+    const assigned: Photo = { ...photo, id: 7, name: 'one.jpg', title: 'One', seriesId: 3, seriesPosition: 0 };
+    const available = [
+      { ...photo, id: 8, name: 'two.jpg', title: 'Two', seriesId: null, seriesPosition: null },
+      { ...photo, id: 9, name: 'three.jpg', title: 'Three', seriesId: null, seriesPosition: null },
+    ];
+    const entry: Series = { id: 3, slug: 'streets', title: 'Street scenes', description: null, position: 0, published: false, totalPhotos: 1, previewPhotos: [], photos: [assigned] };
     const fetcher = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
-      if (url.endsWith('/series') && (!init?.method || init.method === 'GET')) return Response.json([]);
-      if (url.endsWith('/series') && init?.method === 'POST') return Response.json({ id: 11, slug: 'street-photography', title: 'Street Photography', description: null, position: 0, published: false, totalPhotos: 0, previewPhotos: [], photos: [] });
+      if (url.endsWith('/series') && (!init?.method || init.method === 'GET')) return Response.json([entry]);
+      if (init?.method === 'PUT' || init?.method === 'PATCH') return new Response(null, { status: 204 });
+      return Response.json([]);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const user = userEvent.setup();
+    render(<SeriesManagement active photos={[assigned, ...available]} session={session} onChanged={async () => undefined} />);
+    await user.click(await screen.findByRole('button', { name: 'Edit' }));
+
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+    const galleryPreview = await screen.findByRole('dialog', { name: 'Street scenes' });
+    expect(galleryPreview).toHaveTextContent('Street scenes');
+    expect(galleryPreview.querySelector('.gallery-preview-gallery img')).toHaveAttribute('src', expect.stringContaining('rain.jpg'));
+    await user.click(screen.getByRole('button', { name: 'Close preview' }));
+
+    await user.click(screen.getByRole('button', { name: 'Add new photos' }));
+    expect(await screen.findByRole('dialog', { name: 'Add new photos' })).toBeVisible();
+    expect(document.querySelector('.add-series-photos-list img')).toHaveAttribute('src', expect.stringContaining('rain.jpg'));
+    await user.click(screen.getByLabelText('Two'));
+    await user.click(screen.getByLabelText('Three'));
+    await user.click(screen.getByRole('button', { name: 'Add 2 selected' }));
+    expect(screen.queryByRole('dialog', { name: 'Add new photos' })).toBeNull();
+    expect(document.querySelectorAll('.curation-photo')).toHaveLength(3);
+    expect(document.querySelector('.message.success')).toHaveTextContent('2 photos added to the series draft. Save changes to keep them.');
+    expect(document.querySelector('.toast')).toHaveTextContent('2 photos added to the series draft. Save changes to keep them.');
+    expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Save draft' }));
+    await waitFor(() => expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')).toBe(true));
+    expect(await waitFor(() => document.querySelector('.toast'))).toHaveTextContent('Series changes saved.');
+    const membership = fetcher.mock.calls.find(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')?.[1];
+    expect(JSON.parse(String(membership?.body))).toEqual({ photoIds: [7, 8, 9] });
+  });
+
+  it('requires explicit confirmation before assigning unassigned photos to Street Photography', async () => {
+    const entry: Series = { id: 11, slug: 'street-photography', title: 'Street Photography', description: null, position: 0, published: false, totalPhotos: 0, previewPhotos: [], photos: [] };
+    const fetcher = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith('/series') && (!init?.method || init.method === 'GET')) return Response.json([entry]);
       if (url.endsWith('/photos') && init?.method === 'PUT') return new Response(null, { status: 204 });
       return Response.json([]);
     });
@@ -79,6 +122,7 @@ describe('series management', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const user = userEvent.setup();
     render(<SeriesManagement active photos={[photo]} session={session} onChanged={async () => undefined} />);
+    await user.selectOptions(await screen.findByLabelText('Destination series'), '11');
     await user.click(await screen.findByLabelText('After rain'));
     await user.click(screen.getByRole('button', { name: /assign 1 selected to street photography/i }));
     expect(confirm).toHaveBeenCalledWith(expect.stringContaining('Assign 1 selected unassigned photo'));
@@ -89,7 +133,7 @@ describe('series management', () => {
     await waitFor(() => expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series/11/photos') && init?.method === 'PUT')).toBe(true));
     const assignment = fetcher.mock.calls.find(([url, init]) => String(url).endsWith('/series/11/photos') && init?.method === 'PUT')?.[1];
     expect(JSON.parse(String(assignment?.body))).toEqual({ photoIds: [7] });
-    expect(screen.getByText(/assigned to street photography/i)).toBeInTheDocument();
+    expect(screen.getByText(/selected photos assigned to “street photography”/i)).toBeInTheDocument();
     confirm.mockRestore();
   });
 
@@ -127,5 +171,29 @@ describe('series management', () => {
     expect(JSON.parse(String(changes[0][1]?.body))).toEqual({ published: false });
     previewRequest = changes.find(([url, init]) => String(url).endsWith('/series/3/preview') && init?.method === 'PUT')?.[1];
     expect(JSON.parse(String(previewRequest?.body))).toEqual({ photoIds: [] });
+  });
+
+  it('rejects dragging an unselected photo into a full homepage preview', async () => {
+    const photos = Array.from({ length: 6 }, (_, index): Photo => ({ ...photo, id: index + 1, name: `photo-${index + 1}.jpg`, title: `Photo ${index + 1}`, seriesId: 3, seriesPosition: index, showInPreview: index < 5, previewPosition: index < 5 ? index : null }));
+    const series: Series = { id: 3, slug: 'streets', title: 'Street scenes', description: null, position: 0, published: false, totalPhotos: 6, photos, previewPhotos: photos.slice(0, 5) };
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => Response.json([series]));
+    vi.stubGlobal('fetch', fetcher);
+    const user = userEvent.setup();
+    render(<SeriesManagement active photos={photos} session={session} onChanged={async () => undefined} />);
+    await user.click(await screen.findByRole('button', { name: 'Edit' }));
+
+    const source = document.querySelectorAll('.curation-drag-handle')[5];
+    const preview = document.querySelector('.preview-tiles');
+    const firstTile = document.querySelector('.preview-tile');
+    expect(source).toBeTruthy(); expect(preview).toBeTruthy(); expect(firstTile).toBeTruthy();
+    fireEvent.dragStart(source!);
+    fireEvent.dragOver(preview!);
+    expect(await screen.findByRole('status')).toHaveTextContent('Preview is full. Remove a photo before adding another.');
+    expect(preview).toHaveClass('is-full');
+    fireEvent.drop(firstTile!);
+    expect(document.querySelectorAll('.preview-tile')).toHaveLength(5);
+    fireEvent.dragEnd(source!);
+    await waitFor(() => expect(screen.queryByText(/Preview is full/)).not.toBeInTheDocument());
+    expect(fetcher.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
   });
 });
