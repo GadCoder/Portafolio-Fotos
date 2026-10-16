@@ -78,8 +78,9 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .series-editor { display: grid; gap: 18px; }
 .curation-list { display: grid; gap: 7px; margin-bottom: 12px; }
 .curation-photo { gap: 7px; min-height: 54px; padding: 5px; border: 1px solid var(--line); border-radius: 5px; background: #fafbfd; }
-.curation-photo[draggable=true], .preview-tile[draggable=true] { cursor: grab; }
-.curation-photo[draggable=true]:active, .preview-tile[draggable=true]:active { cursor: grabbing; }
+.curation-drag-handle { display: grid; width: 28px; min-width: 28px; height: 34px; place-items: center; border: 1px solid var(--line); border-radius: 4px; background: white; color: #8190a0; cursor: grab; font-size: 1.15rem; line-height: 1; user-select: none; }
+.curation-drag-handle:active, .preview-tile[draggable=true]:active { cursor: grabbing; }
+.preview-tile[draggable=true] { cursor: grab; }
 .curation-photo img { width: 54px; height: 42px; border-radius: 3px; object-fit: cover; }
 .curation-photo > span { min-width: 0; flex: 1; overflow-wrap: anywhere; font-size: .82rem; }
 .curation-photo .danger, .preview-tile .danger { min-height: 34px; padding: 0 8px; font-size: .76rem; }
