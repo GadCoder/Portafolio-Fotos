@@ -98,6 +98,7 @@ describe('series management', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save draft' }));
     await waitFor(() => expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')).toBe(true));
+    expect(await waitFor(() => document.querySelector('.toast'))).toHaveTextContent('Series changes saved.');
     const membership = fetcher.mock.calls.find(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')?.[1];
     expect(JSON.parse(String(membership?.body))).toEqual({ photoIds: [7, 8, 9] });
   });

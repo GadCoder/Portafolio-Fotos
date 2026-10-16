@@ -15,7 +15,7 @@ export default function SeriesManagement({ active: isActive, photos, session, on
   const [addPhotosOpen, setAddPhotosOpen] = useState(false); const [addPhotoIds, setAddPhotoIds] = useState<number[]>([]);
   const [memberIds, setMemberIds] = useState<number[]>([]); const [previewIds, setPreviewIds] = useState<number[]>([]);
   const [bulkIds, setBulkIds] = useState<number[]>([]); const [bulkSeriesId, setBulkSeriesId] = useState(''); const [draggedSeries, setDraggedSeries] = useState<number | null>(null); const [draggedPhoto, setDraggedPhoto] = useState<number | null>(null); const [draggedPreview, setDraggedPreview] = useState<number | null>(null); const [dropTargetPhotoId, setDropTargetPhotoId] = useState<number | null>(null); const [dropTargetPreviewId, setDropTargetPreviewId] = useState<number | null>(null); const [justDroppedId, setJustDroppedId] = useState<number | null>(null);
-  const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState(''); const [toast, setToast] = useState('');
   const reorderLock = useRef(false);
   const createDialogRef = useRef<HTMLDialogElement>(null); const createTitleRef = useRef<HTMLInputElement>(null); const createOpenerRef = useRef<HTMLButtonElement>(null); const editorHeadingRef = useRef<HTMLHeadingElement>(null); const createdDraftRef = useRef(false);
   const addPhotosDialogRef = useRef<HTMLDialogElement>(null); const addPhotosOpenerRef = useRef<HTMLButtonElement>(null);
@@ -40,6 +40,11 @@ export default function SeriesManagement({ active: isActive, photos, session, on
     if (addPhotosOpen && dialog && !dialog.open) dialog.showModal();
     else if (!addPhotosOpen && dialog?.open) dialog.close();
   }, [addPhotosOpen]);
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(''), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
   const current = useMemo(() => series.find((item) => item.id === selected?.id) ?? selected, [series, selected]);
   const unassigned = photos.filter((photo) => photo.seriesId == null);
   const homepagePhotoIds = memberIds.length <= 5 ? memberIds : previewIds;
@@ -91,7 +96,8 @@ export default function SeriesManagement({ active: isActive, photos, session, on
       if (publish !== undefined || (current?.published && (JSON.stringify(memberIds) !== JSON.stringify(current.photos.map((photo) => photo.id)) || JSON.stringify(previewIds) !== JSON.stringify(current.previewPhotos.map((photo) => photo.id))))) await apiRequest(`/series/${item.id}`, { method: 'PATCH', csrfToken: session.csrf_token, body: { published: finalPublished } });
       await load(); await onChanged();
       const refreshed = await apiRequest<Series[]>('/series'); const saved = refreshed.find((entry) => entry.id === item?.id); if (saved) edit(saved);
-      setNotice(publish === undefined ? 'Series changes saved.' : publish ? 'Series published.' : 'Series saved as draft.');
+      const successMessage = publish === undefined ? 'Series changes saved.' : publish ? 'Series published.' : 'Series saved as draft.';
+      setNotice(successMessage); setToast(successMessage);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not save series.'); }
     finally { setBusy(false); }
   }
@@ -192,5 +198,6 @@ export default function SeriesManagement({ active: isActive, photos, session, on
         <div className="actions"><button className="primary" disabled={busy || !addPhotoIds.length} onClick={addSelectedPhotos}>Add {addPhotoIds.length ? `${addPhotoIds.length} ` : ''}selected</button><button className="quiet" disabled={busy} onClick={closeAddPhotosDialog}>Cancel</button></div>
       </div>}
     </dialog>
+    {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
   </section>;
 }
