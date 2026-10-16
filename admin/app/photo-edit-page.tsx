@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { apiRequest, type Photo, type Presentation, type SessionResponse } from '../lib/api';
 import { adminPhotoUrl } from '../lib/photos';
 
-type EditState = Omit<Presentation, 'year'> & { year: number | null | string };
+type EditState = Presentation;
 const emptyPresentation = (photo: Photo): EditState => ({
   featured: photo.featured, featuredLayout: photo.featuredLayout,
-  title: photo.title ?? '', location: photo.location ?? '', year: photo.year,
+  title: photo.title ?? '', location: photo.location ?? '',
   seriesSlug: photo.seriesSlug ?? '',
 });
 
@@ -26,7 +26,6 @@ export default function PhotoEditPage({ photo, session, onCancel, onSaved }: {
       ...draft,
       title: draft.title?.trim() || null,
       location: draft.location?.trim() || null,
-      year: draft.year === '' || draft.year === null ? null : Number(draft.year),
       seriesSlug: draft.seriesSlug?.trim() || null,
     };
     try {
@@ -50,7 +49,6 @@ export default function PhotoEditPage({ photo, session, onCancel, onSaved }: {
         {draft.featured && <label>Featured layout<select value={draft.featuredLayout ?? 'wide'} onChange={(event) => setDraft({ ...draft, featuredLayout: event.target.value as Presentation['featuredLayout'] })}><option value="wide">Wide</option><option value="contained">Contained</option></select></label>}
         <label>Title<input value={draft.title ?? ''} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
         <label>Location<input value={draft.location ?? ''} onChange={(event) => setDraft({ ...draft, location: event.target.value })} /></label>
-        <label>Year<input type="number" min="1800" max="2200" value={draft.year ?? ''} onChange={(event) => setDraft({ ...draft, year: event.target.value === '' ? null : Number(event.target.value) })} /></label>
         <label>Series slug<input value={draft.seriesSlug ?? ''} onChange={(event) => setDraft({ ...draft, seriesSlug: event.target.value })} /></label>
         <div className="actions"><button className="primary" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button><button className="quiet" type="button" onClick={onCancel} disabled={busy}>Cancel</button></div>
       </form>

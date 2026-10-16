@@ -12,11 +12,16 @@ export interface Photo {
   id: number; is_horizontal: boolean; photo_url: string; name: string;
   width: number | null; height: number | null; featured: boolean;
   featuredLayout: 'wide' | 'contained' | null; title: string | null;
-  location: string | null; year: number | null; seriesSlug: string | null; created_at: string;
+  location: string | null; seriesSlug: string | null; created_at: string;
+  seriesId?: number | null; seriesPosition?: number | null; showInPreview?: boolean; previewPosition?: number | null;
+}
+export interface Series {
+  id: number; slug: string; title: string; description: string | null; year?: number | null; position: number;
+  published: boolean; totalPhotos: number; previewPhotos: Photo[]; photos: Photo[];
 }
 export interface Presentation {
   featured: boolean; featuredLayout: 'wide' | 'contained' | null;
-  title: string | null; location: string | null; year: number | null; seriesSlug: string | null;
+  title: string | null; location: string | null; seriesSlug: string | null;
 }
 type RequestOptions = {
   method?: string; csrfToken?: string; body?: unknown; files?: File[];
@@ -42,8 +47,16 @@ export async function apiRequest<T = void>(path: string, options: RequestOptions
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
     try {
-      const payload = await response.json() as { detail?: string; message?: string };
-      message = payload.detail ?? payload.message ?? message;
+      const payload = await response.json() as { detail?: unknown; message?: unknown };
+      const detail = payload.detail;
+      if (typeof detail === 'string') message = detail;
+      else if (Array.isArray(detail)) message = detail.map((issue) => {
+        if (!issue || typeof issue !== 'object') return String(issue);
+        const item = issue as { loc?: unknown[]; msg?: unknown };
+        const field = Array.isArray(item.loc) ? item.loc.filter((part) => part !== 'body').join(' → ') : '';
+        return `${field ? `${field}: ` : ''}${typeof item.msg === 'string' ? item.msg : 'Invalid value'}`;
+      }).join('; ');
+      else if (typeof payload.message === 'string') message = payload.message;
     } catch { /* Keep the status-based message for non-JSON errors. */ }
     throw new Error(message);
   }

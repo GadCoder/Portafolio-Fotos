@@ -25,12 +25,16 @@ components/
 ├── ErrorComponent.tsx # Error state UI
 ```
 
-## API Contract
+## Public series API
 
-The portfolio consumes data from:
-`https://portfolio-api.gadcoder.com/photo/get-all-photos/`
+The static build reads `GET https://portfolio-api.gadcoder.com/series/`, an ordered
+array of published series. Each item contains `id`, `slug`, `title`, nullable
+`description`, `position`, `totalPhotos`, curated `previewPhotos`, and all manually
+ordered `photos`. The same object is available from
+`GET /series/{slug}/` for API clients. The frontend uses the single list payload
+for both the homepage and generated detail pages.
 
-**Expected response:**
+Each photo uses the existing fields below plus optional series presentation fields:
 
 ```typescript
 interface Photo {
@@ -46,10 +50,25 @@ interface Photo {
   location?: string | null;
   year?: number | null;
   seriesSlug?: string | null;
+  seriesId?: number | null;
+  seriesPosition?: number | null;
+  showInPreview?: boolean;
+  previewPosition?: number | null;
 }
 ```
 
-**Error handling:** API or image metadata failures stop the build so the previous deployment stays live.
+Series with five or fewer photographs show every photo on the homepage. Larger
+series show their curated preview, limited to five photographs, and link to a
+generated `/series/{slug}` page. Featured presentation comes from the canonical
+photo objects in the full series, so previews and detail pages share the same
+feature settings.
+
+Set `PHOTOGRAPHY_API_BASE_URL` to override the API origin during builds and
+`NEXT_PUBLIC_SITE_URL` to set the canonical site origin. The defaults are
+`https://portfolio-api.gadcoder.com` and `https://portfolio.gadcoder.com`.
+Malformed series data, API errors, or image metadata failures stop the build so
+the previous deployment stays live. An empty published-series array builds the
+homepage empty state without publishing any series pages.
 
 ## Editorial gallery
 
@@ -74,7 +93,7 @@ during builds, including EXIF orientation. It uses four concurrent readers, a
 30-second timeout per image, a 50 MB limit, and a cache in
 `.next/cache/photo-dimensions.json`. Images use their final ratios before download.
 A metadata or API failure fails the build, keeping the previous deployment live.
-An empty API array is a valid empty gallery.
+An empty published-series list produces the homepage empty state.
 
 ### Publishing admin changes
 
@@ -114,7 +133,8 @@ The Compose healthcheck probes the admin's local `/healthz` endpoint.
 
 - **CDN**: Cloudflare Images with on-the-fly transformations
 - **Formats**: Auto-conversion to WebP/AVIF
-- **Scroll loading**: The first three images load eagerly. A shared observer starts
+- **Scroll loading**: Only the first homepage photograph receives eager/high-priority
+  loading. Other images are lazy-loaded; each gallery observer starts
   nearby image requests roughly three viewport heights ahead (2,000–4,000px),
   updating the range on resize. Distant images remain lazy. Data-saving mode,
   disabled JavaScript, and browsers without IntersectionObserver retain native
@@ -130,6 +150,7 @@ The Compose healthcheck probes the admin's local `/healthz` endpoint.
 npm run dev      # Development server
 npm run build    # Production build (static export)
 npm run lint     # ESLint
+npm test         # Series contract and gallery order checks
 ```
 
 ## Deployment

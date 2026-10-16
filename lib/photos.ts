@@ -3,8 +3,23 @@ export type PhotoPresentation = {
   featuredLayout?: "wide" | "contained" | null;
   title?: string | null;
   location?: string | null;
-  year?: number | null;
   seriesSlug?: string | null;
+  seriesId?: number | null;
+  seriesPosition?: number | null;
+  showInPreview?: boolean;
+  previewPosition?: number | null;
+};
+
+export type PhotoSeries = {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  year?: number | null;
+  position: number;
+  totalPhotos: number;
+  previewPhotos: GalleryPhoto[];
+  photos: GalleryPhoto[];
 };
 
 export type GalleryPhoto = PhotoPresentation & {
