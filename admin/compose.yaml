@@ -1,8 +1,8 @@
 services:
   admin:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: admin/Dockerfile
     environment:
       ADMIN_API_ORIGIN: ${ADMIN_API_ORIGIN:-https://portfolio-api.gadcoder.com}
     ports:

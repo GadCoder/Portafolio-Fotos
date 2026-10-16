@@ -2,5 +2,14 @@ node_modules
 .next
 out
 /admin/dist
+/api/dist
+/api/src/generated
+/packages/*/dist
+.env
+.env.*
+!.env.example
+api/.env
+api/.env.*
+!api/.env.example
 
 *.tsbuildinfo

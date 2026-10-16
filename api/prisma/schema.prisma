@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Photo {
+  id              Int       @id @default(autoincrement())
+  isHorizontal    Boolean?  @map("is_horizontal")
+  photoUrl        String?   @map("photo_url") @db.VarChar(255)
+  name            String?   @db.VarChar(255)
+  width           Int?
+  height          Int?
+  featured        Boolean   @default(false)
+  featuredLayout  String?   @map("featured_layout") @db.VarChar(16)
+  title           String?   @db.VarChar(255)
+  location        String?   @db.VarChar(255)
+  seriesSlug      String?   @map("series_slug") @db.VarChar(255)
+  seriesId        Int?      @map("series_id")
+  seriesPosition  Int?      @map("series_position")
+  showInPreview   Boolean   @default(false) @map("show_in_preview")
+  previewPosition Int?      @map("preview_position")
+  createdAt       DateTime  @map("created_at") @db.Timestamptz(6)
+  series          Series?   @relation(fields: [seriesId], references: [id], onDelete: SetNull, map: "fk_photos_series_id_series")
+
+  @@index([seriesId], map: "ix_photos_series_id")
+  @@map("photos")
+}
+
+model Series {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique(map: "uq_series_slug") @db.VarChar(100)
+  title       String   @db.VarChar(255)
+  description String?
+  year        Int?
+  position    Int      @default(0)
+  published   Boolean  @default(false)
+  createdAt   DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @map("updated_at") @db.Timestamptz(6)
+  photos      Photo[]
+
+  @@index([slug], map: "ix_series_slug")
+  @@map("series")
+}
+
+model AdminSession {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique(map: "admin_sessions_token_hash_key") @map("token_hash") @db.VarChar(64)
+  user      String   @db.VarChar(255)
+  csrfToken String   @map("csrf_token") @db.VarChar(64)
+  createdAt DateTime @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+
+  @@index([tokenHash], map: "ix_admin_sessions_token_hash")
+  @@index([expiresAt], map: "ix_admin_sessions_expires_at")
+  @@map("admin_sessions")
+}
+
+model GalleryPublication {
+  id                Int      @id
+  revision          Int
+  requestedRevision Int      @map("requested_revision")
+  changedAt         DateTime @map("changed_at") @db.Timestamptz(6)
+
+  @@map("gallery_publication")
+}

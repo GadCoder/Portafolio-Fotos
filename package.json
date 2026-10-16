@@ -2,14 +2,24 @@
   "name": "portfolio-photos",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "pnpm --filter @portfolio-photos/contracts build && next dev",
+    "dev:admin": "pnpm --filter portfolio-photos-admin dev",
+    "dev:api": "pnpm --filter @portfolio-photos/api dev",
+    "build": "pnpm --filter @portfolio-photos/contracts build && next build",
+    "build:contracts": "pnpm --filter @portfolio-photos/contracts build",
+    "build:admin": "pnpm --filter portfolio-photos-admin build",
+    "build:api": "pnpm --filter @portfolio-photos/api build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node --require ./tests/register-typescript.cjs --test tests/*.test.cjs"
+    "test": "pnpm --filter @portfolio-photos/contracts build && node --require ./tests/register-typescript.cjs --test tests/*.test.cjs"
   },
   "dependencies": {
+    "@portfolio-photos/contracts": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",

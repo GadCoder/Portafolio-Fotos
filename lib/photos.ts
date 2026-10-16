@@ -1,34 +1,16 @@
-export type PhotoPresentation = {
-  featured?: boolean;
-  featuredLayout?: "wide" | "contained" | null;
-  title?: string | null;
-  location?: string | null;
-  seriesSlug?: string | null;
-  seriesId?: number | null;
-  seriesPosition?: number | null;
-  showInPreview?: boolean;
-  previewPosition?: number | null;
-};
+import type { PhotoDto, PhotoPresentation as ApiPhotoPresentation, PublicSeriesDto } from "@portfolio-photos/contracts";
 
-export type PhotoSeries = {
-  id: number;
-  slug: string;
-  title: string;
-  description: string | null;
-  year?: number | null;
-  position: number;
-  totalPhotos: number;
-  previewPhotos: GalleryPhoto[];
+export type PhotoPresentation = Partial<ApiPhotoPresentation> & Pick<PhotoDto,
+  "seriesId" | "seriesPosition" | "showInPreview" | "previewPosition"
+>;
+
+export type GalleryPhoto = PhotoPresentation & Pick<PhotoDto,
+  "id" | "is_horizontal" | "photo_url" | "name" | "width" | "height"
+>;
+
+export type PhotoSeries = Omit<PublicSeriesDto, "photos" | "previewPhotos"> & {
   photos: GalleryPhoto[];
-};
-
-export type GalleryPhoto = PhotoPresentation & {
-  id: number;
-  is_horizontal: boolean;
-  photo_url: string;
-  name: string;
-  width?: number | null;
-  height?: number | null;
+  previewPhotos: GalleryPhoto[];
 };
 
 export function hasImageDimensions(photo: Pick<GalleryPhoto, "width" | "height">) {

@@ -147,10 +147,14 @@ The Compose healthcheck probes the admin's local `/healthz` endpoint.
 ## Available Scripts
 
 ```bash
-npm run dev      # Development server
-npm run build    # Production build (static export)
-npm run lint     # ESLint
-npm test         # Series contract and gallery order checks
+pnpm dev         # Public portfolio development server
+pnpm dev:admin   # Private admin development server
+pnpm dev:api     # API development server
+pnpm build       # Production public build (static export)
+pnpm build:admin # Private admin build
+pnpm build:api   # API build
+pnpm lint        # ESLint
+pnpm test        # Series contract and gallery order checks
 ```
 
 ## Deployment
@@ -162,7 +166,7 @@ In the Cloudflare Pages project's **Settings → Build configuration**, use:
 | Setting | Value |
 | --- | --- |
 | Framework preset | Next.js (Static HTML Export) |
-| Build command | `npm run build` |
+| Build command | `pnpm build` |
 | Build output directory | `out` |
 | Root directory | Repository root (leave blank) |
 
@@ -178,20 +182,20 @@ app even builds. After saving the settings, retry the failed deployment.
 See [Cloudflare's static Next.js deployment guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/).
 
 ```bash
-npm run build
+pnpm build
 # Static output is generated in ./out
 ```
 
 ## Requirements
 
 - Node.js 24 LTS
-- npm or yarn
+- pnpm 10 (the repository pins its package manager version)
 
 ## Installation
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.

@@ -1,0 +1,39 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+      APP_USER: ${APP_USER:?Set APP_USER}
+      APP_PASSWORD_HASH: ${APP_PASSWORD_HASH:?Set APP_PASSWORD_HASH}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET}
+      APP_ENV: ${APP_ENV:-production}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      ADMIN_SESSION_MAX_AGE: ${ADMIN_SESSION_MAX_AGE:-28800}
+      PORTFOLIO_ORIGINS: ${PORTFOLIO_ORIGINS:-https://portfolio.gadcoder.com}
+      CLOUDFLARE_PAGES_DEPLOY_HOOK_URL: ${CLOUDFLARE_PAGES_DEPLOY_HOOK_URL:-}
+      IMAGE_MAX_PIXELS: ${IMAGE_MAX_PIXELS:-80000000}
+      s3_key: ${s3_key:?Set s3_key}
+      s3_secret_key: ${s3_secret_key:?Set s3_secret_key}
+      s3_endpoint: ${s3_endpoint:?Set s3_endpoint}
+      s3_bucket_name: ${s3_bucket_name:?Set s3_bucket_name}
+      s3_url: ${s3_url:?Set s3_url}
+    networks:
+      - dokploy-network
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  dokploy-network:
+    external: true

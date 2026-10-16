@@ -6,3 +6,7 @@ out
 .gitignore
 Dockerfile
 README.md
+.env
+.env.*
+api/.env
+api/.env.*
