@@ -135,7 +135,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .create-series-form .eyebrow { margin: 0; }
 .create-series-form h2 { margin: -6px 0 0; font-size: 1.55rem; }
 .create-series-form > .muted { margin-top: -10px; }
-.add-series-photos-opener { margin-top: 2px; }
+.add-series-photos-opener { display: block; margin: 0 0 12px; }
 .add-series-photos-dialog { width: min(820px, calc(100% - 32px)); max-height: min(90vh, 820px); margin: auto; padding: 26px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); box-shadow: 0 24px 80px #10181433; }
 .add-series-photos-dialog::backdrop { background: #10181499; backdrop-filter: blur(2px); }
 .add-series-photos-content > .eyebrow { margin-bottom: 7px; }
