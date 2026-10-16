@@ -4,6 +4,12 @@ import { adminPhotoUrl } from '../lib/photos';
 import PhotoEditPage from './photo-edit-page';
 import SeriesManagement from './series-management';
 
+function formatCreatedAt(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+}
+
 export default function AdminPage() {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [activeTab, setActiveTab] = useState<'photos' | 'series'>('photos');
@@ -230,7 +236,11 @@ export default function AdminPage() {
         {photos.map((photo) => <article className="photo-card" key={photo.id}>
           <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url, 640)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" /><div className="photo-actions"><button className="quiet" onClick={(event) => { openerRef.current = event.currentTarget; setEditTarget(photo); }}>Edit</button><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>{photo.featured && <span className="badge">Featured</span>}</div>
           <div className="photo-content"><div className="photo-heading"><h2>{photo.title || photo.name}</h2><span>{photo.width ?? '—'} × {photo.height ?? '—'}</span></div>
-            {(photo.location || photo.seriesSlug) && <p className="meta">{[photo.location, photo.seriesSlug].filter(Boolean).join(' · ')}</p>}
+            <p className="meta">
+              {[photo.location, photo.seriesSlug].filter(Boolean).join(' · ')}
+              {(photo.location || photo.seriesSlug) && ' · '}
+              Created <time dateTime={photo.created_at}>{formatCreatedAt(photo.created_at)}</time>
+            </p>
           </div>
         </article>)}
       </section>}
