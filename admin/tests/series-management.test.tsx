@@ -174,15 +174,15 @@ describe('series management', () => {
   });
 
   it('rejects dragging an unselected photo into a full homepage preview', async () => {
-    const photos = Array.from({ length: 6 }, (_, index): Photo => ({ ...photo, id: index + 1, name: `photo-${index + 1}.jpg`, title: `Photo ${index + 1}`, seriesId: 3, seriesPosition: index, showInPreview: index < 5, previewPosition: index < 5 ? index : null }));
-    const series: Series = { id: 3, slug: 'streets', title: 'Street scenes', description: null, position: 0, published: false, totalPhotos: 6, photos, previewPhotos: photos.slice(0, 5) };
+    const photos = Array.from({ length: 7 }, (_, index): Photo => ({ ...photo, id: index + 1, name: `photo-${index + 1}.jpg`, title: `Photo ${index + 1}`, seriesId: 3, seriesPosition: index, showInPreview: index < 6, previewPosition: index < 6 ? index : null }));
+    const series: Series = { id: 3, slug: 'streets', title: 'Street scenes', description: null, position: 0, published: false, totalPhotos: 7, photos, previewPhotos: photos.slice(0, 6) };
     const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => Response.json([series]));
     vi.stubGlobal('fetch', fetcher);
     const user = userEvent.setup();
     render(<SeriesManagement active photos={photos} session={session} onChanged={async () => undefined} />);
     await user.click(await screen.findByRole('button', { name: 'Edit' }));
 
-    const source = document.querySelectorAll('.curation-drag-handle')[5];
+    const source = document.querySelectorAll('.curation-drag-handle')[6];
     const preview = document.querySelector('.preview-tiles');
     const firstTile = document.querySelector('.preview-tile');
     expect(source).toBeTruthy(); expect(preview).toBeTruthy(); expect(firstTile).toBeTruthy();
@@ -191,7 +191,7 @@ describe('series management', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Preview is full. Remove a photo before adding another.');
     expect(preview).toHaveClass('is-full');
     fireEvent.drop(firstTile!);
-    expect(document.querySelectorAll('.preview-tile')).toHaveLength(5);
+    expect(document.querySelectorAll('.preview-tile')).toHaveLength(6);
     fireEvent.dragEnd(source!);
     await waitFor(() => expect(screen.queryByText(/Preview is full/)).not.toBeInTheDocument());
     expect(fetcher.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);

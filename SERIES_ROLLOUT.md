@@ -17,7 +17,7 @@ push, or deployment is part of this implementation.
 3. Use the private admin to create or review series. Choose the unassigned
    photos that belong to Street Photography and confirm their bulk assignment.
    Configure full ordering and, for series with more than five photos, one to
-   five ordered preview selections before publishing.
+   six ordered preview selections before publishing.
 4. Check `/series/` and `/series/{slug}/` on the backend. The public list must
    contain only the intended published series in order. Publishing no series
    intentionally produces an empty public portfolio.
@@ -55,7 +55,7 @@ verify production deployment or owner-approved curation.
 Browser verification used local series fixtures with 0–6 photographs at 390px
 and 1440px viewport widths. Homepage counts were 0, 1, 2, 3, 4, 5, and 5; only
 the six-photo series had a detail link. Its detail page rendered all six
-photographs, its homepage lightbox navigated within its five-photo scope, and
+photographs, its homepage lightbox navigated within its preview-photo scope, and
 neither viewport overflowed horizontally. Image requests were fulfilled with
 local placeholders, so this check verifies behavior and geometry rather than
 production CDN availability or photograph appearance. PostgreSQL row locking

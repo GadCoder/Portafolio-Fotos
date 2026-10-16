@@ -30,14 +30,14 @@ function seriesWithCount(count) {
     position: 0,
     totalPhotos: count,
     photos,
-    previewPhotos: count <= 5 ? photos : photos.slice(0, 5),
+    previewPhotos: count <= 5 ? photos : photos.slice(0, 6),
   };
 }
 
-test("homepage uses every photograph for series of 0–5 and five previews above five", () => {
-  for (let count = 0; count <= 6; count += 1) {
+test("homepage uses every photograph for series of 0–5 and six previews above five", () => {
+  for (let count = 0; count <= 7; count += 1) {
     const series = validateSeries(seriesWithCount(count), `series-${count}`);
-    assert.equal(homepageSeriesPhotos(series).length, Math.min(count, 5));
+    assert.equal(homepageSeriesPhotos(series).length, Math.min(count, 6));
     if (count <= 5) assert.deepEqual(homepageSeriesPhotos(series).map(({ id }) => id), series.photos.map(({ id }) => id));
   }
 });
