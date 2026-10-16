@@ -70,6 +70,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .series-metadata input, .series-metadata textarea, .series-metadata select, .create-series-form input, .create-series-form textarea { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); }
 .series-curation-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .curation-column { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 7px; background: white; }
+.homepage-preview-column { position: sticky; top: 16px; z-index: 3; align-self: start; }
 .curation-column h3 { margin: 0 0 5px; font-size: 1.05rem; }
 .curation-column h3 .muted { font-size: .8rem; font-weight: 400; }
 .curation-column > .muted { margin-bottom: 12px; font-size: .83rem; }
@@ -204,6 +205,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
   .series-editor-header > div { grid-column: 1; grid-row: 2; text-align: left; }
   .series-editor-header > button { grid-row: 1; }
   .series-metadata, .series-curation-grid { grid-template-columns: 1fr; }
+  .homepage-preview-column { top: 8px; order: -1; max-height: 42vh; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 8px 24px #17211e18; }
   .series-metadata label:last-child { grid-column: auto; }
   .curation-photo { grid-template-columns: 24px 26px 84px minmax(0, 1fr) auto; gap: 6px; min-height: 82px; padding: 5px; }
   .curation-drag-handle { width: 26px; height: 34px; }
