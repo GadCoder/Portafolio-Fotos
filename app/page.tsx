@@ -28,7 +28,7 @@ export default async function Home() {
                   </div>
                   {item.description && <p>{item.description}</p>}
                 </div>
-                {item.totalPhotos > 5 && (
+                {item.totalPhotos > 6 && (
                   <Link href={`/series/${item.slug}`} className="series-link">
                     Ver serie <span aria-hidden="true">→</span>
                   </Link>
