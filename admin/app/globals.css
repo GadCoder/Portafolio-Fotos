@@ -135,6 +135,20 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .create-series-form .eyebrow { margin: 0; }
 .create-series-form h2 { margin: -6px 0 0; font-size: 1.55rem; }
 .create-series-form > .muted { margin-top: -10px; }
+.add-series-photos-opener { margin-top: 2px; }
+.add-series-photos-dialog { width: min(820px, calc(100% - 32px)); max-height: min(90vh, 820px); margin: auto; padding: 26px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); box-shadow: 0 24px 80px #10181433; }
+.add-series-photos-dialog::backdrop { background: #10181499; backdrop-filter: blur(2px); }
+.add-series-photos-content > .eyebrow { margin-bottom: 7px; }
+.add-series-photos-content h2 { margin: 0 0 6px; font-size: 1.55rem; }
+.add-series-photos-content > .muted { margin-bottom: 18px; font-size: .88rem; }
+.add-series-photos-list { display: grid; max-height: min(56vh, 520px); grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; overflow: auto; padding: 2px; }
+.add-series-photo-choice { position: relative; display: grid; grid-template-rows: 130px auto; gap: 7px; overflow: hidden; padding: 7px; border: 1px solid var(--line); border-radius: 6px; background: white; cursor: pointer; transition: border-color .15s, box-shadow .15s, background .15s; }
+.add-series-photo-choice:hover { border-color: #aabdd1; }
+.add-series-photo-choice.is-selected { border-color: var(--blue); background: #f1f6fb; box-shadow: 0 0 0 2px #315c8920; }
+.add-series-photo-choice input { position: absolute; top: 14px; left: 14px; width: 20px; height: 20px; accent-color: var(--blue); }
+.add-series-photo-choice img { display: block; width: 100%; height: 130px; border-radius: 3px; background: #edf2f7; object-fit: cover; }
+.add-series-photo-choice span { min-width: 0; overflow: hidden; font-size: .8rem; text-overflow: ellipsis; white-space: nowrap; }
+.add-series-photos-content > .actions { justify-content: flex-end; margin-top: 18px; }
 .photo-card { align-self: start; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: white; }
 .image-wrap { position: relative; height: 240px; background: #e8eef5; }
 .image-wrap img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -212,6 +226,10 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
   .curation-photo img { width: 84px; height: 72px; }
   .curation-photo-title { font-size: .78rem; }
   .create-series-dialog { padding: 20px; }
+  .add-series-photos-dialog { padding: 20px; }
+  .add-series-photos-list { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); }
+  .add-series-photo-choice { grid-template-rows: 112px auto; }
+  .add-series-photo-choice img { height: 112px; }
   .editor-page { grid-template-columns: 1fr; gap: 20px; padding-top: 22px; }
   .edit-dialog { width: calc(100% - 20px); max-height: calc(100vh - 20px); padding: 12px; }
   .edit-dialog .editor-page { grid-template-columns: 1fr; gap: 12px; }

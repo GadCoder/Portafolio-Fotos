@@ -12,11 +12,13 @@ export default function SeriesManagement({ active: isActive, photos, session, on
   const [title, setTitle] = useState(''); const [slug, setSlug] = useState(''); const [description, setDescription] = useState('');
   const [year, setYear] = useState('');
   const [createOpen, setCreateOpen] = useState(false); const [createTitle, setCreateTitle] = useState(''); const [createSlug, setCreateSlug] = useState(''); const [createDescription, setCreateDescription] = useState(''); const [createYear, setCreateYear] = useState(''); const [createError, setCreateError] = useState('');
+  const [addPhotosOpen, setAddPhotosOpen] = useState(false); const [addPhotoIds, setAddPhotoIds] = useState<number[]>([]);
   const [memberIds, setMemberIds] = useState<number[]>([]); const [previewIds, setPreviewIds] = useState<number[]>([]);
   const [bulkIds, setBulkIds] = useState<number[]>([]); const [bulkSeriesId, setBulkSeriesId] = useState(''); const [draggedSeries, setDraggedSeries] = useState<number | null>(null); const [draggedPhoto, setDraggedPhoto] = useState<number | null>(null); const [draggedPreview, setDraggedPreview] = useState<number | null>(null); const [dropTargetPhotoId, setDropTargetPhotoId] = useState<number | null>(null); const [dropTargetPreviewId, setDropTargetPreviewId] = useState<number | null>(null); const [justDroppedId, setJustDroppedId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('');
   const reorderLock = useRef(false);
   const createDialogRef = useRef<HTMLDialogElement>(null); const createTitleRef = useRef<HTMLInputElement>(null); const createOpenerRef = useRef<HTMLButtonElement>(null); const editorHeadingRef = useRef<HTMLHeadingElement>(null); const createdDraftRef = useRef(false);
+  const addPhotosDialogRef = useRef<HTMLDialogElement>(null); const addPhotosOpenerRef = useRef<HTMLButtonElement>(null);
 
   const load = useCallback(async () => { const result = await apiRequest<Series[]>('/series'); setSeries(result); return result; }, []);
   useEffect(() => {
@@ -33,14 +35,27 @@ export default function SeriesManagement({ active: isActive, photos, session, on
       requestAnimationFrame(() => createTitleRef.current?.focus());
     } else if (!createOpen && dialog?.open) dialog.close();
   }, [createOpen]);
+  useEffect(() => {
+    const dialog = addPhotosDialogRef.current;
+    if (addPhotosOpen && dialog && !dialog.open) dialog.showModal();
+    else if (!addPhotosOpen && dialog?.open) dialog.close();
+  }, [addPhotosOpen]);
   const current = useMemo(() => series.find((item) => item.id === selected?.id) ?? selected, [series, selected]);
-  const membershipChoices = photos.filter((photo) => photo.seriesId == null || photo.seriesId === current?.id);
   const unassigned = photos.filter((photo) => photo.seriesId == null);
   const homepagePhotoIds = memberIds.length <= 5 ? memberIds : previewIds;
   const draggedPhotoBlocked = draggedPhoto !== null && previewIds.length >= 5 && !previewIds.includes(draggedPhoto);
   function edit(item: Series) { setSelected(item); setTitle(item.title); setSlug(item.slug); setDescription(item.description ?? ''); setYear(item.year?.toString() ?? ''); setMemberIds(item.photos.map((photo) => photo.id)); setPreviewIds(item.previewPhotos.map((photo) => photo.id)); setError(''); setNotice(''); setView('edit'); requestAnimationFrame(() => editorHeadingRef.current?.focus()); }
   function backToList() { setView('list'); setError(''); setNotice(''); requestAnimationFrame(() => document.getElementById('series-list-heading')?.focus()); }
   function closeCreateDialog() { if (busy) return; setCreateOpen(false); setCreateError(''); setCreateTitle(''); setCreateSlug(''); setCreateDescription(''); setCreateYear(''); requestAnimationFrame(() => createOpenerRef.current?.focus()); }
+  function closeAddPhotosDialog() { setAddPhotosOpen(false); setAddPhotoIds([]); requestAnimationFrame(() => addPhotosOpenerRef.current?.focus()); }
+  function addSelectedPhotos() {
+    const availableIds = new Set(unassigned.map((photo) => photo.id));
+    const additions = addPhotoIds.filter((id) => availableIds.has(id) && !memberIds.includes(id));
+    setMemberIds((existing) => [...existing, ...additions]);
+    setAddPhotosOpen(false); setAddPhotoIds([]);
+    if (additions.length) setNotice(`${additions.length} photo${additions.length === 1 ? '' : 's'} added to the series draft. Save changes to keep them.`);
+    requestAnimationFrame(() => addPhotosOpenerRef.current?.focus());
+  }
   async function createDraft(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true); setCreateError('');
@@ -151,7 +166,7 @@ export default function SeriesManagement({ active: isActive, photos, session, on
         <div className="series-curation-grid">
           <div className="curation-column"><h3>Full series order <span className="muted">({memberIds.length})</span></h3><p className="muted">Drag photos to reorder them, or drag one into the homepage preview.</p>
             <div className="curation-list">{memberIds.map((id, index) => { const photo = photos.find((entry) => entry.id === id); if (!photo) return null; return <div className={`curation-photo ${draggedPhoto === id ? 'is-dragging' : ''} ${dropTargetPhotoId === id ? 'is-drop-target' : ''} ${justDroppedId === id ? 'just-dropped' : ''}`} key={id} onAnimationEnd={() => { if (justDroppedId === id) setJustDroppedId(null); }} onDragOver={(event) => { event.preventDefault(); if (draggedPhoto !== null && draggedPhoto !== id) { setDropTargetPhotoId(id); setDropTargetPreviewId(null); } }} onDrop={(event) => { event.preventDefault(); if (busy || draggedPhoto === null || draggedPhoto === id) return; const from = memberIds.indexOf(draggedPhoto); setMemberIds(reorder(memberIds, from, index)); setJustDroppedId(draggedPhoto); setDraggedPhoto(null); setDropTargetPhotoId(null); }}><span className="curation-position" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span className="curation-drag-handle" role="img" aria-label={`Drag ${photo.name} to reorder or add to homepage preview`} title="Drag to reorder or add to homepage preview" draggable={!busy} onDragStart={(event) => { setDraggedPhoto(id); if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(id)); const row = event.currentTarget.closest('.curation-photo'); if (row) event.dataTransfer.setDragImage(row, Math.min(30, row.clientWidth / 2), row.clientHeight / 2); } }} onDragEnd={() => { setDraggedPhoto(null); setDropTargetPhotoId(null); setDropTargetPreviewId(null); }}>⠿</span><img src={adminPhotoUrl(photo.photo_url, 240)} alt="" /><span className="curation-photo-title">{photo.title || photo.name}{photo.featured ? <small className="featured-mark"> · Featured {photo.featuredLayout ?? 'wide'}</small> : null}</span><button className="danger" disabled={busy} onClick={() => { setMemberIds(memberIds.filter((value) => value !== id)); setPreviewIds(previewIds.filter((value) => value !== id)); }}>Remove</button></div>; })}</div>
-            <label>Add available photo<select disabled={busy} value="" onChange={(event) => { const id = Number(event.target.value); if (id && !memberIds.includes(id)) setMemberIds([...memberIds, id]); }}><option value="">Choose a photo…</option>{membershipChoices.filter((photo) => !memberIds.includes(photo.id)).map((photo) => <option key={photo.id} value={photo.id}>{photo.title || photo.name}</option>)}</select></label>
+            <button ref={addPhotosOpenerRef} className="quiet add-series-photos-opener" disabled={busy || !unassigned.some((photo) => !memberIds.includes(photo.id))} onClick={() => { setAddPhotoIds([]); setAddPhotosOpen(true); }}>Add new photos</button>
           </div>
           <div className="curation-column homepage-preview-column"><h3>Homepage preview <span className="muted">({previewIds.length}/5)</span></h3><p className="muted">Choose and order up to five. Featured styling carries through to the public gallery.</p>
             <div className={`preview-tiles ${draggedPhoto !== null && !draggedPhotoBlocked ? 'is-drop-target' : ''} ${draggedPhotoBlocked ? 'is-full' : ''}`} onDragOver={(event) => { if (draggedPhotoBlocked) { if (event.dataTransfer) event.dataTransfer.dropEffect = 'none'; setDropTargetPhotoId(null); setDropTargetPreviewId(null); return; } if (draggedPhoto !== null) { event.preventDefault(); if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'; setDropTargetPhotoId(null); setDropTargetPreviewId(null); } }} onDrop={(event) => { event.preventDefault(); if (draggedPhoto !== null && !draggedPhotoBlocked) dropIntoPreview(draggedPhoto); }}>
@@ -170,6 +185,12 @@ export default function SeriesManagement({ active: isActive, photos, session, on
         <label>Title<input ref={createTitleRef} required disabled={busy} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)} /></label><label>Slug<input required disabled={busy} value={createSlug} onChange={(event) => setCreateSlug(event.target.value)} /></label><label>Year<input type="number" min="1800" max="2200" disabled={busy} value={createYear} onChange={(event) => setCreateYear(event.target.value)} /></label><label>Description<textarea rows={3} disabled={busy} value={createDescription} onChange={(event) => setCreateDescription(event.target.value)} /></label>
         <div className="actions"><button className="primary" disabled={busy}>{busy ? 'Creating draft…' : 'Create draft'}</button><button className="quiet" type="button" disabled={busy} onClick={closeCreateDialog}>Cancel</button></div>
       </form>
+    </dialog>
+    <dialog ref={addPhotosDialogRef} className="add-series-photos-dialog" aria-label="Add new photos" onCancel={(event) => { event.preventDefault(); closeAddPhotosDialog(); }} onClose={() => { if (!addPhotosOpen) requestAnimationFrame(() => addPhotosOpenerRef.current?.focus()); }}>
+      {addPhotosOpen && <div className="add-series-photos-content"><p className="eyebrow">SERIES PHOTOS</p><h2 id="add-series-photos-heading">Add new photos</h2><p className="muted">Select unassigned photos to add to the end of this series order. Save changes to keep them.</p>
+        <div className="add-series-photos-list" aria-label="Available unassigned photos">{unassigned.filter((photo) => !memberIds.includes(photo.id)).map((photo) => <label className={`add-series-photo-choice ${addPhotoIds.includes(photo.id) ? 'is-selected' : ''}`} key={photo.id}><input type="checkbox" disabled={busy} checked={addPhotoIds.includes(photo.id)} onChange={() => toggleId(addPhotoIds, setAddPhotoIds, photo.id)} /><img src={adminPhotoUrl(photo.photo_url, 320)} alt="" loading="lazy" /><span>{photo.title || photo.name}</span></label>)}{!unassigned.some((photo) => !memberIds.includes(photo.id)) && <p className="muted">There are no unassigned photos available.</p>}</div>
+        <div className="actions"><button className="primary" disabled={busy || !addPhotoIds.length} onClick={addSelectedPhotos}>Add {addPhotoIds.length ? `${addPhotoIds.length} ` : ''}selected</button><button className="quiet" disabled={busy} onClick={closeAddPhotosDialog}>Cancel</button></div>
+      </div>}
     </dialog>
   </section>;
 }
