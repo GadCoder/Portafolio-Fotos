@@ -6,9 +6,6 @@ export default function TopBar() {
           Portafolio fotográfico
         </a>
         <nav className="site-nav" aria-label="Navegación principal">
-          <a href="#work" className="active" aria-current="page">
-            Fotografías
-          </a>
           <a href="#work">Series</a>
           <a href="#about">Sobre mí</a>
         </nav>
