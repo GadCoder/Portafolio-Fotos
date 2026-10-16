@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { apiRequest, type Photo, type Series, type SessionResponse } from '../lib/api';
 import { adminPhotoUrl } from '../lib/photos';
-import { galleryRows } from '../../lib/gallery-layout';
-import { imageDimensions } from '../../lib/photos';
+import { galleryRows, imageDimensions } from '../lib/gallery-preview';
 
 type Props = { active: boolean; photos: Photo[]; session: Extract<SessionResponse, { authenticated: true }>; onChanged: () => Promise<unknown> };
 const reorder = <T,>(items: T[], from: number, to: number) => { const next = [...items]; const [item] = next.splice(from, 1); next.splice(to, 0, item); return next; };
