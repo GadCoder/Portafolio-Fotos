@@ -93,6 +93,11 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .featured-mark, .preview-tile b { color: var(--blue); font-size: .72rem; }
 .preview-tiles { display: grid; min-height: 84px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 9px; padding: 8px; border: 1px dashed transparent; border-radius: 6px; transition: border-color .15s, background .15s; }
 .preview-tiles.is-drop-target { border-color: #8ba8c8; background: #f3f7fb; animation: preview-drop-pulse .9s ease-in-out infinite alternate; }
+.preview-tiles.is-full { border-color: #d5a6a1; background: #fbf5f4; }
+.preview-tiles.is-full .preview-tile { cursor: not-allowed; }
+.preview-limit-notice { grid-column: 1 / -1; margin: 0; padding: 9px 11px; border: 1px solid #e3c1bc; border-radius: 5px; background: #fff; color: #854b45; font-size: .8rem; font-weight: 650; text-align: center; animation: limit-notice-in .18s ease-out; }
+.preview-limit-notice span { margin-right: 6px; font-size: 1rem; }
+@keyframes limit-notice-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes preview-drop-pulse { from { box-shadow: 0 0 0 0 #4a79aa00; } to { box-shadow: 0 0 0 4px #4a79aa20; } }
 .preview-drop-hint { grid-column: 1 / -1; align-self: center; margin: 0; color: var(--muted); font-size: .82rem; text-align: center; }
 .preview-tile { overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #fbfcfd; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease; }
@@ -116,7 +121,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .preview-visual span { display: block; padding: 5px; color: var(--muted); font-size: .65rem; }
 @media (prefers-reduced-motion: reduce) {
   .curation-photo, .preview-tile { transition: none; }
-  .curation-photo.just-dropped, .preview-tile.just-dropped, .preview-tiles.is-drop-target { animation: none; }
+  .curation-photo.just-dropped, .preview-tile.just-dropped, .preview-tiles.is-drop-target, .preview-limit-notice { animation: none; }
 }
 .series-actions { flex-wrap: wrap; }
 .bulk-assignment { margin-top: 22px; padding: 15px 18px; border: 1px solid var(--line); border-radius: 7px; background: #ffffffb8; }
