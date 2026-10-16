@@ -58,10 +58,10 @@ interface Photo {
 ```
 
 Series with five or fewer photographs show every photo on the homepage. Larger
-series show their curated preview, limited to six photographs, and link to a
-generated `/series/{slug}` page. Featured presentation comes from the canonical
-photo objects in the full series, so previews and detail pages share the same
-feature settings.
+series show their curated preview, limited to six photographs. Only series with
+more than six photographs link to a generated `/series/{slug}` page. Featured
+presentation comes from the canonical photo objects in the full series, so
+previews and detail pages share the same feature settings.
 
 Set `PHOTOGRAPHY_API_BASE_URL` to override the API origin during builds and
 `NEXT_PUBLIC_SITE_URL` to set the canonical site origin. The defaults are

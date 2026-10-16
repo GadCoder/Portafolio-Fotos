@@ -53,9 +53,11 @@ verifies static generation without changing production records; it does not
 verify production deployment or owner-approved curation.
 
 Browser verification used local series fixtures with 0–6 photographs at 390px
-and 1440px viewport widths. Homepage counts were 0, 1, 2, 3, 4, 5, and 5; only
-the six-photo series had a detail link. Its detail page rendered all six
-photographs, its homepage lightbox navigated within its preview-photo scope, and
+and 1440px viewport widths. Homepage counts were 0, 1, 2, 3, 4, 5, and 5; at
+that time, only the six-photo series had a detail link. The homepage now shows
+that link only for series with more than six photos. The six-photo detail page
+rendered all six photographs, its homepage lightbox navigated within its
+preview-photo scope, and
 neither viewport overflowed horizontally. Image requests were fulfilled with
 local placeholders, so this check verifies behavior and geometry rather than
 production CDN availability or photograph appearance. PostgreSQL row locking
