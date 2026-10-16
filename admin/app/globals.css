@@ -73,6 +73,8 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .homepage-preview-column { position: sticky; top: 16px; z-index: 3; align-self: start; }
 .curation-column h3 { margin: 0 0 5px; font-size: 1.05rem; }
 .curation-column h3 .muted { font-size: .8rem; font-weight: 400; }
+.curation-column-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+.curation-column-heading h3 { margin: 0; }
 .curation-column > .muted { margin-bottom: 12px; font-size: .83rem; }
 .series-actions { margin: 0; padding: 16px; border: 1px solid var(--line); border-radius: 7px; background: white; }
 .curation-photo .quiet { min-width: 34px; min-height: 34px; padding: 0; }
@@ -135,7 +137,7 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .create-series-form .eyebrow { margin: 0; }
 .create-series-form h2 { margin: -6px 0 0; font-size: 1.55rem; }
 .create-series-form > .muted { margin-top: -10px; }
-.add-series-photos-opener { display: block; margin: 0 0 12px; }
+.add-series-photos-opener { flex: 0 0 auto; }
 .add-series-photos-dialog { width: min(820px, calc(100% - 32px)); max-height: min(90vh, 820px); margin: auto; padding: 26px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); box-shadow: 0 24px 80px #10181433; }
 .add-series-photos-dialog::backdrop { background: #10181499; backdrop-filter: blur(2px); }
 .add-series-photos-content > .eyebrow { margin-bottom: 7px; }
