@@ -85,6 +85,12 @@ describe('series management', () => {
     render(<SeriesManagement active photos={[assigned, ...available]} session={session} onChanged={async () => undefined} />);
     await user.click(await screen.findByRole('button', { name: 'Edit' }));
 
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+    const galleryPreview = await screen.findByRole('dialog', { name: 'Street scenes' });
+    expect(galleryPreview).toHaveTextContent('Street scenes');
+    expect(galleryPreview.querySelector('.gallery-preview-gallery img')).toHaveAttribute('src', expect.stringContaining('rain.jpg'));
+    await user.click(screen.getByRole('button', { name: 'Close preview' }));
+
     await user.click(screen.getByRole('button', { name: 'Add new photos' }));
     expect(await screen.findByRole('dialog', { name: 'Add new photos' })).toBeVisible();
     expect(document.querySelector('.add-series-photos-list img')).toHaveAttribute('src', expect.stringContaining('rain.jpg'));
