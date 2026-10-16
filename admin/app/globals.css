@@ -77,7 +77,12 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .curation-photo .quiet { min-width: 34px; min-height: 34px; padding: 0; }
 .series-editor { display: grid; gap: 18px; }
 .curation-list { display: grid; gap: 7px; margin-bottom: 12px; }
-.curation-photo { display: grid; grid-template-columns: 30px 30px 120px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 106px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: #fafbfd; }
+.curation-photo { position: relative; display: grid; grid-template-columns: 30px 30px 120px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 106px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: #fafbfd; transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, opacity .18s ease; }
+.curation-photo.is-dragging, .preview-tile.is-dragging { opacity: .42; transform: scale(.975); }
+.curation-photo.is-dragging { border-style: dashed; box-shadow: 0 8px 22px #263b511c; }
+.curation-photo.is-drop-target { z-index: 1; transform: translateY(-2px); border-color: var(--blue); background: #f0f6fc; box-shadow: 0 5px 16px #325c851f; }
+.curation-photo.just-dropped, .preview-tile.just-dropped { animation: curation-drop-settle .32s cubic-bezier(.2,.8,.25,1); }
+@keyframes curation-drop-settle { 0% { transform: scale(.96) translateY(4px); } 65% { transform: scale(1.015) translateY(-1px); } 100% { transform: scale(1) translateY(0); } }
 .curation-position { color: #8290a0; font-size: .78rem; font-variant-numeric: tabular-nums; text-align: center; }
 .curation-drag-handle { display: grid; width: 30px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 4px; background: white; color: #8190a0; cursor: grab; font-size: 1.15rem; line-height: 1; user-select: none; }
 .curation-drag-handle:active, .preview-tile[draggable=true]:active { cursor: grabbing; }
@@ -87,9 +92,11 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .curation-photo .danger, .preview-tile .danger { min-height: 34px; padding: 0 8px; font-size: .76rem; }
 .featured-mark, .preview-tile b { color: var(--blue); font-size: .72rem; }
 .preview-tiles { display: grid; min-height: 84px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 9px; padding: 8px; border: 1px dashed transparent; border-radius: 6px; transition: border-color .15s, background .15s; }
-.preview-tiles.is-drop-target { border-color: #8ba8c8; background: #f3f7fb; }
+.preview-tiles.is-drop-target { border-color: #8ba8c8; background: #f3f7fb; animation: preview-drop-pulse .9s ease-in-out infinite alternate; }
+@keyframes preview-drop-pulse { from { box-shadow: 0 0 0 0 #4a79aa00; } to { box-shadow: 0 0 0 4px #4a79aa20; } }
 .preview-drop-hint { grid-column: 1 / -1; align-self: center; margin: 0; color: var(--muted); font-size: .82rem; text-align: center; }
-.preview-tile { overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #fbfcfd; }
+.preview-tile { overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #fbfcfd; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease; }
+.preview-tile.is-drop-target { transform: scale(.975); border-color: var(--blue); box-shadow: 0 5px 18px #325c8526; }
 .preview-tile.is-featured { border: 2px solid var(--blue); }
 .preview-tile img { display: block; width: 100%; height: 96px; object-fit: cover; }
 .preview-tile > span { display: block; padding: 7px 8px 2px; font-size: .76rem; overflow-wrap: anywhere; }
@@ -107,6 +114,10 @@ h1 { margin-bottom: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.
 .preview-visual > div.visual-wide { grid-column: span 2; }
 .preview-visual img { display: block; width: 100%; height: 78px; object-fit: cover; }
 .preview-visual span { display: block; padding: 5px; color: var(--muted); font-size: .65rem; }
+@media (prefers-reduced-motion: reduce) {
+  .curation-photo, .preview-tile { transition: none; }
+  .curation-photo.just-dropped, .preview-tile.just-dropped, .preview-tiles.is-drop-target { animation: none; }
+}
 .series-actions { flex-wrap: wrap; }
 .bulk-assignment { margin-top: 22px; padding: 15px 18px; border: 1px solid var(--line); border-radius: 7px; background: #ffffffb8; }
 .bulk-assignment summary { cursor: pointer; font-weight: 700; }
