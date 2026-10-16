@@ -93,7 +93,8 @@ describe('series management', () => {
     await user.click(screen.getByRole('button', { name: 'Add 2 selected' }));
     expect(screen.queryByRole('dialog', { name: 'Add new photos' })).toBeNull();
     expect(document.querySelectorAll('.curation-photo')).toHaveLength(3);
-    expect(screen.getByRole('status')).toHaveTextContent('2 photos added to the series draft. Save changes to keep them.');
+    expect(document.querySelector('.message.success')).toHaveTextContent('2 photos added to the series draft. Save changes to keep them.');
+    expect(document.querySelector('.toast')).toHaveTextContent('2 photos added to the series draft. Save changes to keep them.');
     expect(fetcher.mock.calls.some(([url, init]) => String(url).endsWith('/series/3/photos') && init?.method === 'PUT')).toBe(false);
 
     await user.click(screen.getByRole('button', { name: 'Save draft' }));

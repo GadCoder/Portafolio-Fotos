@@ -58,7 +58,10 @@ export default function SeriesManagement({ active: isActive, photos, session, on
     const additions = addPhotoIds.filter((id) => availableIds.has(id) && !memberIds.includes(id));
     setMemberIds((existing) => [...existing, ...additions]);
     setAddPhotosOpen(false); setAddPhotoIds([]);
-    if (additions.length) setNotice(`${additions.length} photo${additions.length === 1 ? '' : 's'} added to the series draft. Save changes to keep them.`);
+    if (additions.length) {
+      const message = `${additions.length} photo${additions.length === 1 ? '' : 's'} added to the series draft. Save changes to keep them.`;
+      setNotice(message); setToast(message);
+    }
     requestAnimationFrame(() => addPhotosOpenerRef.current?.focus());
   }
   async function createDraft(event: FormEvent<HTMLFormElement>) {
