@@ -6,16 +6,16 @@ export type GalleryRow = {
 };
 
 /** Group consecutive photos once, so visual, keyboard and lightbox order agree. */
-export function galleryRows(photos: readonly GalleryPhoto[]): GalleryRow[] {
+export function galleryRows(photos: readonly GalleryPhoto[], featuredLayout = true): GalleryRow[] {
   const rows: GalleryRow[] = [];
   let index = 0;
   while (index < photos.length) {
     const first = index++;
     const indices = [first];
     const dimensions = imageDimensions(photos[first]);
-    const featured = Boolean(photos[first].featured);
+    const featured = featuredLayout && Boolean(photos[first].featured);
     const companions = featured && dimensions.width / dimensions.height >= 0.45 ? 2 : featured ? 0 : 1;
-    while (indices.length <= companions && index < photos.length && !photos[index].featured) {
+    while (indices.length <= companions && index < photos.length && (!featuredLayout || !photos[index].featured)) {
       indices.push(index++);
     }
     rows.push({ indices, featured });

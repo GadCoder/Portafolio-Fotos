@@ -34,7 +34,7 @@ export default async function Home() {
                   </Link>
                 )}
               </header>
-              <PhotoGallery photos={photos} prioritizeFirstImage={item.slug === firstImageSeries} />
+              <PhotoGallery photos={photos} prioritizeFirstImage={item.slug === firstImageSeries} featuredLayout={false} />
             </section>
           );
         })}

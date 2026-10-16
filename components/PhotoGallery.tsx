@@ -10,9 +10,10 @@ function imageSizes(fraction: number, offset: number, maxWidth: number) {
   return `(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) ${width("(100vw - 64px)")}, (max-width: 1535px) ${width("(100vw - 96px)")}, ${Math.ceil(Math.min(maxWidth, 1440 * fraction + offset))}px`;
 }
 
-export default function PhotoGallery({ photos, prioritizeFirstImage = true }: {
+export default function PhotoGallery({ photos, prioritizeFirstImage = true, featuredLayout = true }: {
   photos: GalleryPhoto[];
   prioritizeFirstImage?: boolean;
+  featuredLayout?: boolean;
 }) {
   function renderPhoto(index: number, sizes: string) {
     const photo = photos[index];
@@ -36,7 +37,7 @@ export default function PhotoGallery({ photos, prioritizeFirstImage = true }: {
     <GalleryLightboxProvider photos={photos}>
       {!photos.length && <p className="gallery-empty">Todavía no hay fotografías.</p>}
       <GalleryImageLoader>
-        {galleryRows(photos).map((row) => {
+        {galleryRows(photos, featuredLayout).map((row) => {
           const dimensions = row.indices.map((index) => imageDimensions(photos[index]));
           const ratios = dimensions.map(({ width, height }) => width / height);
           if (row.featured && row.indices.length > 1) {

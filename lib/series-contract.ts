@@ -49,7 +49,7 @@ export function validateSeries(value: unknown, context: string): PhotoSeries {
   const previewPhotos = value.previewPhotos.map((photo, i) => validatePhoto(photo, `${context}.previewPhotos[${i}]`));
   const ids = new Set(photos.map((photo) => photo.id));
   if (ids.size !== photos.length || photos.length !== value.totalPhotos) throw new Error(`${context}: photo count or IDs are inconsistent`);
-  if (previewPhotos.length > 5 || new Set(previewPhotos.map((photo) => photo.id)).size !== previewPhotos.length
+  if (previewPhotos.length > 6 || new Set(previewPhotos.map((photo) => photo.id)).size !== previewPhotos.length
     || previewPhotos.some((photo) => !ids.has(photo.id))) throw new Error(`${context}: invalid preview selection`);
   if ((value.totalPhotos as number) > 5 && previewPhotos.length === 0) throw new Error(`${context}: a series with more than five photos needs a preview`);
   return { ...value, description: value.description ?? null, photos, previewPhotos } as PhotoSeries;
