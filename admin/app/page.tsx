@@ -2,9 +2,11 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, type Photo, type SessionResponse } from '../lib/api';
 import { adminPhotoUrl } from '../lib/photos';
 import PhotoEditPage from './photo-edit-page';
+import SeriesManagement from './series-management';
 
 export default function AdminPage() {
   const [session, setSession] = useState<SessionResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<'photos' | 'series'>('photos');
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,18 +23,52 @@ export default function AdminPage() {
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const galleryHeadingRef = useRef<HTMLHeadingElement>(null);
+  const editRouteHandled = useRef(false);
+  const photosTabRef = useRef<HTMLButtonElement>(null);
+  const seriesTabRef = useRef<HTMLButtonElement>(null);
 
   const loadPhotos = useCallback(async () => {
     const result = await apiRequest<Photo[]>('/photos');
     setPhotos(result);
+    return result;
   }, []);
+
+  function openEditRoute(loadedPhotos: Photo[]) {
+    if (editRouteHandled.current) return;
+    editRouteHandled.current = true;
+    const match = window.location.pathname.match(/^\/photos\/(\d+)\/edit\/?$/);
+    if (!match) return;
+    const target = loadedPhotos.find((photo) => photo.id === Number(match[1]));
+    if (target) setEditTarget(target);
+  }
+
+  function selectTab(tab: 'photos' | 'series', focus = false) {
+    setActiveTab(tab);
+    if (focus) requestAnimationFrame(() => (tab === 'photos' ? photosTabRef.current : seriesTabRef.current)?.focus());
+  }
+
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    const tabs: Array<'photos' | 'series'> = ['photos', 'series'];
+    const current = tabs.indexOf(activeTab);
+    let next = current;
+    if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') next = (current + tabs.length - 1) % tabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    selectTab(tabs[next], true);
+  }
 
   useEffect(() => {
     let active = true;
     apiRequest<SessionResponse>('/session').then(async (current) => {
       if (!active) return;
       setSession(current);
-      if (current.authenticated) await loadPhotos();
+      if (current.authenticated) {
+        const loadedPhotos = await loadPhotos();
+        if (active) openEditRoute(loadedPhotos);
+      }
     }).catch((reason: unknown) => {
       if (active) setError(reason instanceof Error ? reason.message : 'Could not restore session.');
     }).finally(() => { if (active) setLoading(false); });
@@ -84,7 +120,7 @@ export default function AdminPage() {
       });
       setSession(authenticated);
       setCredentials({ user: '', password: '' });
-      if (authenticated.authenticated) await loadPhotos();
+      if (authenticated.authenticated) openEditRoute(await loadPhotos());
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Sign in failed.'); }
     finally { setBusy(false); }
   }
@@ -172,30 +208,36 @@ export default function AdminPage() {
   );
 
   return <main className="admin-shell">
-    <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
+    <header className="topbar"><div><p className="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Photography admin</h1></div><div className="account"><button className="quiet" type="button" onClick={() => void deployGallery()} disabled={deploying}>{deploying ? 'Requesting deployment…' : 'Deploy public gallery'}</button><span>{session.user}</span><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button></div></header>
+    {error && <p className="message error" role="alert">{error}</p>}
+    {notice && <p className="message success" role="status">{notice}</p>}
+    {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
+    <div className="admin-tabs" role="tablist" aria-label="Portfolio management" onKeyDown={handleTabKeyDown}>
+      <button ref={photosTabRef} id="photos-tab" className="admin-tab" role="tab" aria-selected={activeTab === 'photos'} aria-controls="photos-panel" tabIndex={activeTab === 'photos' ? 0 : -1} onClick={() => selectTab('photos')}>Photos</button>
+      <button ref={seriesTabRef} id="series-tab" className="admin-tab" role="tab" aria-selected={activeTab === 'series'} aria-controls="series-panel" tabIndex={activeTab === 'series' ? 0 : -1} onClick={() => selectTab('series')}>Series</button>
+    </div>
+    <section id="photos-panel" className="admin-tab-panel" role="tabpanel" aria-labelledby="photos-tab" hidden={activeTab !== 'photos'}>
     <section className="toolbar" aria-label="Photo management">
       <div><h2 ref={galleryHeadingRef} tabIndex={-1}>Photo library <span className="count">{photos.length}</span></h2><p className="muted">Saved changes publish automatically. Deploy now to publish sooner.</p></div>
       <div className="toolbar-actions">
-        <button className="quiet" type="button" onClick={() => void deployGallery()} disabled={deploying}>
-          {deploying ? 'Requesting deployment…' : 'Deploy public gallery'}
-        </button>
         <form className="upload-form" onSubmit={upload}><label className="file-picker">Choose images<input name="files" type="file" accept="image/*" multiple /></label><button className="primary" disabled={busy}>Upload selected</button></form>
       </div>
     </section>
     {uploadProgress && <p className="message" role="status" aria-live="polite">{uploadProgress}</p>}
-    {error && <p className="message error" role="alert">{error}</p>}
-    {notice && <p className="message success" role="status">{notice}</p>}
-    {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
     {uploadResults.length > 0 && <ul className="upload-results" aria-label="Per-file upload results" aria-live="polite">{uploadResults.map((result, index) => <li key={`${index}-${result.filename}`} className={result.success ? 'upload-success' : 'upload-failure'}><strong>{result.filename}</strong>: <span>{result.success ? 'Success' : 'Failed'}</span> — {result.message}</li>)}</ul>}
     {!photos.length ? <section className="empty"><h2>No photos yet</h2><p>Upload images to begin building your portfolio.</p></section> :
       <section className="gallery" aria-label="Photos">
         {photos.map((photo) => <article className="photo-card" key={photo.id}>
           <div className="image-wrap"><img src={adminPhotoUrl(photo.photo_url, 640)} alt={photo.title || photo.name} width={photo.width ?? 1200} height={photo.height ?? 800} loading="lazy" decoding="async" /><div className="photo-actions"><button className="quiet" onClick={(event) => { openerRef.current = event.currentTarget; setEditTarget(photo); }}>Edit</button><button className="danger" onClick={(event) => { openerRef.current = event.currentTarget; setDeleteTarget(photo); }}>Delete</button></div>{photo.featured && <span className="badge">Featured</span>}</div>
           <div className="photo-content"><div className="photo-heading"><h2>{photo.title || photo.name}</h2><span>{photo.width ?? '—'} × {photo.height ?? '—'}</span></div>
-            {(photo.location || photo.year || photo.seriesSlug) && <p className="meta">{[photo.location, photo.year, photo.seriesSlug].filter(Boolean).join(' · ')}</p>}
+            {(photo.location || photo.seriesSlug) && <p className="meta">{[photo.location, photo.seriesSlug].filter(Boolean).join(' · ')}</p>}
           </div>
         </article>)}
       </section>}
+    </section>
+    <div id="series-panel" className="admin-tab-panel" role="tabpanel" aria-labelledby="series-tab" hidden={activeTab !== 'series'}>
+      <SeriesManagement active={activeTab === 'series'} photos={photos} session={session} onChanged={loadPhotos} />
+    </div>
     <dialog ref={dialogRef} className="dialog" aria-labelledby="delete-heading" aria-describedby="delete-description" onCancel={(event) => { event.preventDefault(); dialogRef.current?.close(); closeDeleteDialog(); }} onClose={() => { if (deleteTarget && !busy) { setDeleteTarget(null); requestAnimationFrame(() => { const opener = openerRef.current; if (opener?.isConnected) opener.focus(); else galleryHeadingRef.current?.focus(); }); } }}>
       {deleteTarget && <><h2 id="delete-heading">Delete this photo?</h2><p id="delete-description">“{deleteTarget.name}” will be permanently removed from the portfolio.</p><div className="actions"><button className="danger" onClick={() => void removePhoto()} disabled={busy}>Delete photo</button><button className="quiet" onClick={() => { dialogRef.current?.close(); closeDeleteDialog(); }} disabled={busy}>Cancel</button></div></>}
     </dialog>

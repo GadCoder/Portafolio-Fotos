@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import AdminPage from '../app/page';
 
 const session = { authenticated: true, user: 'admin', csrf_token: 'token' };
-const photo = { id: 7, is_horizontal: true, photo_url: 'https://images.test/rain.jpg', name: 'rain.jpg', width: 1200, height: 800, featured: false, featuredLayout: null, title: null, location: null, year: null, seriesSlug: null, created_at: '2026-01-01' };
+const photo = { id: 7, is_horizontal: true, photo_url: 'https://images.test/rain.jpg', name: 'rain.jpg', width: 1200, height: 800, featured: false, featuredLayout: null, title: null, location: null, seriesSlug: null, created_at: '2026-01-01' };
 
 function mockApi(
   uploadResults: unknown = { results: [] },
@@ -25,6 +25,27 @@ function mockApi(
 }
 
 describe('admin gallery', () => {
+  it('switches between accessible Photos and Series tabs', async () => {
+    mockApi();
+    const user = userEvent.setup();
+    render(<AdminPage />);
+    const photosTab = await screen.findByRole('tab', { name: 'Photos' });
+    const seriesTab = screen.getByRole('tab', { name: 'Series' });
+    expect(photosTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel', { name: 'Photos' })).toBeVisible();
+    expect(document.getElementById('series-panel')).toHaveAttribute('hidden');
+
+    await user.click(seriesTab);
+    expect(seriesTab).toHaveAttribute('aria-selected', 'true');
+    expect(document.getElementById('series-panel')).not.toHaveAttribute('hidden');
+    expect(screen.getByRole('heading', { name: /Series 0/ })).toBeInTheDocument();
+
+    seriesTab.focus();
+    await user.keyboard('{ArrowLeft}');
+    expect(photosTab).toHaveAttribute('aria-selected', 'true');
+    await waitFor(() => expect(photosTab).toHaveFocus());
+  });
+
   it.each([{}, { results: 'bad' }, { results: [{ filename: 'x.jpg' }] }])('rejects malformed upload response %j without completing upload', async (response) => {
     const fetch = mockApi(response);
     const user = userEvent.setup();
@@ -46,9 +67,10 @@ describe('admin gallery', () => {
     window.history.replaceState({}, '', '/photos/7/edit');
     try {
       render(<AdminPage />);
-      expect(await screen.findByLabelText('Title')).toHaveValue('');
+      const editor = await screen.findByRole('dialog');
+      expect(within(editor).getByLabelText('Title')).toHaveValue('');
       fetch.mockResolvedValueOnce(Response.json({ detail: 'Save failed' }, { status: 500 }));
-      const title = screen.getByLabelText('Title');
+      const title = within(editor).getByLabelText('Title');
       await user.type(title, 'After rain');
       await user.click(screen.getByRole('button', { name: 'Save changes' }));
       expect(await screen.findByRole('alert')).toHaveTextContent('Save failed');
